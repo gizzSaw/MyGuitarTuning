@@ -69,12 +69,14 @@ body {
 
 .header__title {
   font-size: 25px;
+  margin: 15px 0px;
 }
 
 .app {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-top: 15px;
 }
 
 .app__notes-item {
@@ -102,9 +104,10 @@ body {
 }
 
 .control__title {
-  width: 230px;
+  width: 270px;
   font-weight: bold;
   text-align: center;
+  font-size: 18px;
 }
 
 .control__notes {
@@ -115,10 +118,12 @@ body {
 .control__btn {
   border: 1px solid #a2a2a3;
   border-radius: 50%;
-  font-size: 16px;
+  font-size: 29px;
   width: 36px;
   height: 36px;
   margin: 12px;
+  color: #f7c223;
+  border-color: #f7c223;
 }
 
 @media (max-width: 500px) {
