@@ -116,7 +116,13 @@ body {
   border: 1px solid #a2a2a3;
   border-radius: 50%;
   font-size: 16px;
-  width: 24px;
-  height: 24px;
+  width: 36px;
+  height: 36px;
   margin: 12px;
+}
+
+@media (max-width: 500px) {
+  .app__img {
+    width: 200px;
+  }
 }
