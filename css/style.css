@@ -102,7 +102,9 @@ body {
 }
 
 .control__title {
+  width: 230px;
   font-weight: bold;
+  text-align: center;
 }
 
 .control__notes {
@@ -112,9 +114,9 @@ body {
 
 .control__btn {
   border: 1px solid #a2a2a3;
-  border-radius: 4px;
-  font-size: 12px;
-  width: 20px;
-  height: 20px;
-  margin: 10px;
+  border-radius: 50%;
+  font-size: 16px;
+  width: 24px;
+  height: 24px;
+  margin: 12px;
 }
