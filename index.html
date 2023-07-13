@@ -17,44 +17,46 @@
         </div>
     </header>
     <main class="main">
-        <div class="container">
-            <div class="app">
+        <section class="app">
+            <div class="container">
+                <div class="app__inner">
+                    <ul class="app__notes">
+                        <li class="app__notes-item string6">E</li>
+                        <li class="app__notes-item string5">A</li>
+                        <li class="app__notes-item string4">D</li>
+                    </ul>
 
-                <ul class="app__notes">
-                    <li class="app__notes-item string6">B</li>
-                    <li class="app__notes-item string5">E</li>
-                    <li class="app__notes-item string4">A</li>
-                </ul>
+                    <img class="app__img" src="img/img.JPG" alt="Изобржение головки грифа гитары">
 
-                <img class="app__img" src="img/img.JPG" alt="Изобржение головки грифа гитары">
+                    <ul class="app__notes">
+                        <li class="app__notes-item string3">G</li>
+                        <li class="app__notes-item string2">B</li>
+                        <li class="app__notes-item string1">E</li>
+                    </ul>
 
-                <ul class="app__notes">
-                    <li class="app__notes-item string3">D</li>
-                    <li class="app__notes-item string2">F#</li>
-                    <li class="app__notes-item string1">B</li>
-                </ul>
-
-            </div>
-        </div>
-    </main>
-    <footer class="footer">
-        <div class="container">
-            <div class="control">
-                <button class="control__btn control__btn_prev">
-                    -
-                </button>
-                <div class="control__title">
-                    <span id="currentTuning">D#</span>
-                    tuning:
-                    <span class="control__notes">B E A D F# B</span>
                 </div>
-                <button class="control__btn control__btn_next">
-                    +
-                </button>
-            </div>
-        </div>
-    </footer>
 
+            </div>
+            <div class="control">
+                <div class="container">
+                    <div class="control__inner">
+                        <button class="control__btn control__btn_prev">
+                            -
+                        </button>
+                        <div class="control__title">
+                            <span id="currentTuning">E</span>
+                            <button class="dropBtn">Standart </button> tuning: 
+                            <br>
+                            <span class="control__notes">E A D G B E</span>
+                        </div>
+                        <button class="control__btn control__btn_next">
+                            +
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
 </body>
 
 </html>
