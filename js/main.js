@@ -67,7 +67,7 @@ const changeTuning = (direction = null) => {
     //     currentTuningIndex = 4
     // }
     
-    if(currentTuningIndex < 0) {  /* из-за этого условия баг с нотой B */
+    if(currentTuningIndex === -1) {  /* из-за этого условия баг с нотой B */
         currentTuningIndex = notes.length - 1
     }
     console.log(currentTuningIndex)
@@ -79,9 +79,9 @@ const changeTuning = (direction = null) => {
     // интевралы для всех струн, если строй не дропнут... вынести в отдельну функцию рассчёт интервалов ? setIntervals
     let interval5 =  5;
     let interval4 = 10; 
-    let interval3 = 15; 
-    let interval2 = 19 - 12; 
-    let interval1 = 24 - 12; 
+    let interval3 = 3; 
+    let interval2 = 7; 
+    let interval1 = 0; 
     // если строй дроп, то интервалы меньше на 2 полутона 
     if (isDroped) {
         interval5 += 2
@@ -107,7 +107,7 @@ const changeTuning = (direction = null) => {
     if (notes[currentTuningIndex + interval3]) {
         string3.textContent = notes[currentTuningIndex + interval3]
     } else {
-        string3.textContent = notes[currentTuningIndex + interval3 - 24]
+        string3.textContent = notes[currentTuningIndex + interval3 - 12]
     }
     //струна 2
     if (notes[currentTuningIndex + interval2]) {
@@ -115,7 +115,7 @@ const changeTuning = (direction = null) => {
     } else {
         string2.textContent = notes[currentTuningIndex + interval2 - 12]
     }
-    //струна 3
+    //струна 1
     if (notes[currentTuningIndex + interval1]) {
         string1.textContent = notes[currentTuningIndex + interval1]
     } else {
