@@ -12,6 +12,13 @@
   font-weight: 700;
 }
 
+:root {
+  --bg: #252527;
+  --clr-1: #a2a2a3;
+  --clr-2: #e7e7ec;
+  --clr-3: #f7c223;;
+}
+
 html {
   box-sizing: border-box;
 }
@@ -57,13 +64,13 @@ body {
   font-size: 16px;
   font-weight: 400;
   line-height: 1.4;
-  color: #a2a2a3;
-  background-color: #252527;
+  color: var(--clr-1);
+  background-color: var(--bg);
 }
 
 .header {
-  border-bottom: 1px solid #cacad5;
-  color: #f7c223;
+  border-bottom: 1px solid var(--clr-2);
+  color: var(--clr-3);
   text-align: center;
 }
 
@@ -86,14 +93,14 @@ body {
   align-items: center;
   justify-content: center;
   margin: 8px;
-  border: 1px solid #e7e7ec;
-  color: #e4e4e4;
+  border: 1px solid var(--clr-2);
+  color: var(--clr-2);
   border-radius: 4px;
   font-size: 25px;
 }
 
 .control {
-  border-top: 1px solid #CACAD6;
+  border-top: 1px solid var(--clr-2);
 }
 
 .control__inner {
@@ -111,23 +118,23 @@ body {
 }
 
 .control__notes {
-  color: #e4e4e4;
+  color: var(--clr-2);
   font-weight: normal;
 }
 
 .control__btn {
-  border: 1px solid #a2a2a3;
+  border: 1px solid var(--clr-1);
   border-radius: 50%;
   font-size: 29px;
   width: 36px;
   height: 36px;
   margin: 12px;
-  color: #f7c223;
-  border-color: #f7c223;
+  color: var(--clr-3);
+  border-color: var(--clr-3);
 }
 
 .dropBtn {
-  color: #f7c223;
+  color: var(--clr-3);
 }
 
 @media (max-width: 500px) {

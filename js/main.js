@@ -13,10 +13,8 @@ const string1 = document.querySelector('.string1')
 const notes = [ 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B' ]
 const strings = [string6,string5,string4,string3,string2,string1] 
 
-
-isDroped = false
-
 // изначально строй не дропнут
+let isDroped = false
 const changeDroped = () => {
     if(isDroped) {
         isDroped = false
@@ -27,18 +25,20 @@ const changeDroped = () => {
     }
     changeTuning()
 }
-
-//отделить корректировку индекса, от записи значения в струну
-const writeCorrectNote = (intrvals, currentTuningIndex) => {
-    for(let i = 0; i < intrvals.length; i++) {
-        if(notes[currentTuningIndex + intrvals[i]]){
-            strings[i].textContent = notes[currentTuningIndex + intrvals[i]]
-        } else {
-            strings[i].textContent = notes[currentTuningIndex + intrvals[i] - notes.length]
-        }
+const returnNoteToOctave = (intrval, currentTuningIndex) => {
+    if(notes[currentTuningIndex + intrval]){
+        return notes[currentTuningIndex + intrval]
+    } else {
+        return notes[currentTuningIndex + intrval - notes.length]
     }
 }
-
+//отделить корректировку индекса, от записи значения в хтмл струну 
+const writeCorrectNote = (intrvals, currentTuningIndex) => {
+    for(let i = 0; i < intrvals.length; i++) {  
+        strings[i].textContent = returnNoteToOctave(intrvals[i], currentTuningIndex)
+        strings[i].textContent = returnNoteToOctave(intrvals[i], currentTuningIndex)
+    }
+}
 // интевралы для всех струн, если строй не дропнут.
 // посчитал на пальцах, там где больш 12, там вычел 12, получается та же нота, октава = 12 полутонов
 const setIntervals = () => {
@@ -60,21 +60,6 @@ const setIntervals = () => {
     return {interval6,interval5, interval4,interval3,interval2,interval1}
 }
 
-//вешаем события на кнопки
-prevBtn.addEventListener('click', () => {
-    changeTuning('prev')
-})
-
-nextBtn.addEventListener('click', () => {
-    changeTuning('next')
-})
-
-dropBtn.addEventListener('click', () => {
-    changeDroped('prev')
-})
-
-
-
 const changeTuning = (direction) => {
     let currentTuning = document.querySelector('#currentTuning')
     let currentTuningIndex = notes.indexOf(currentTuning.textContent)
@@ -85,7 +70,7 @@ const changeTuning = (direction) => {
         currentTuningIndex--
     } 
     
-    //при выходе за пределы массива перебрасываем 
+    //при выходе за пределы массива нот перебрасываем  returnToNotesArray useEndlesHarmony
     if(currentTuningIndex < 0) { 
         currentTuningIndex = notes.length - 1 //в конец массива
     } else if (currentTuningIndex > notes.length - 1) {
@@ -111,5 +96,19 @@ const changeTuning = (direction) => {
         string1.textContent 
     )
 }
+
+//вешаем события на кнопки
+prevBtn.addEventListener('click', () => {
+    changeTuning('prev')
+})
+
+nextBtn.addEventListener('click', () => {
+    changeTuning('next')
+})
+
+dropBtn.addEventListener('click', () => {
+    changeDroped('prev')
+})
+
 
 changeTuning()
