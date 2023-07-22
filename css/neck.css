@@ -19,7 +19,7 @@
 .string {
     position: relative;
     border: 2px solid var(--clr-1);
-    height: 40px;
+    height: 43px;
     width: 50px;
     margin: -2px;
     margin-left: 0px;
@@ -60,5 +60,48 @@
 
 .hidden {
     display: none;
+}
+
+@media (max-width: 820px) {
+    .string {
+        height: 39px;
+        width: 40px;
+    }
+    .note {
+        width: 23px;
+        height: 23px;
+        font-size: 13px;
+        left: 20%;
+    }
+    .fret_0 .note {
+        background-color: transparent;
+    }
+}
+
+
+@media (max-width: 610px) {
+    .string {
+        height: 35px;
+        width: 30px;
+    }
+    .note {
+        width: 23px;
+        height: 23px;
+        font-size: 11px;
+        left: 16%;
+    }
+}
+
+@media (max-width: 500px) {
+    .string {
+        height: 32px;
+        width: 25px;
+    }
+    .note {
+        width: 16px;
+        height: 17px;
+        font-size: 9px;
+        left: 12%;
+    }
 }
 
