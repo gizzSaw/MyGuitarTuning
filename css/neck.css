@@ -90,6 +90,11 @@
         font-size: 11px;
         left: 16%;
     }
+    .fret_0 .note {
+        font-size: 15px;
+        bottom: 4px;
+    }
+
 }
 
 @media (max-width: 500px) {
@@ -102,6 +107,10 @@
         height: 17px;
         font-size: 9px;
         left: 12%;
+    }
+    .fret_0 .note {
+        font-size: 14px;
+        bottom: 2px;
     }
 }
 
