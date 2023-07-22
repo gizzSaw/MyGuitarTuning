@@ -137,6 +137,9 @@ body {
 
 .dropBtn {
   color: var(--clr-3);
+  border: 1px solid var(--clr-3);
+  padding: 4px 8px;
+  border-radius: 7px;
 }
 
 @media (max-width: 500px) {
