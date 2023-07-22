@@ -1,0 +1,63 @@
+:root {
+    --bg: #252527;
+    --clr-1: #a2a2a3;
+    --clr-2: #e7e7ec;
+    --clr-3: #f7c223;;
+    --clr-neck: rgb(44, 31, 26);
+}
+
+body {
+    background-color: var(--bg);
+}
+
+.guitar-neck {
+    display: flex;
+    color: var(--clr-3);
+    justify-content: center;
+    margin-bottom: 100px;
+}
+
+.fret-number {
+    text-align: center;
+    color: var(--clr-1);
+}
+
+.fret_0, .fret_3, .fret_5, .fret_7, .fret_9, .fret_12{
+    background-color: var(--clr-neck);
+}
+
+.string {
+    position: relative;
+    border: 2px solid var(--clr-1);
+    height: 40px;
+    width: 50px;
+    margin: -2px;
+    margin-left: 0px;
+}
+
+.string1 {
+    border: none;
+    background-color: var(--bg);
+    border: 1px solid var(--bg);
+}
+  
+.note {
+    position: absolute;
+    bottom: 0px;
+    left: 25%;
+    transform: translateX(-50%);
+    transform: translateY(50%);
+    width: 30px;
+    height: 30px;
+    background-color: var(--bg);
+    border: 1px solid var(--clr-1);
+    border-radius: 50%;
+    text-align: center;
+    line-height: 1.8;
+    z-index: 1;
+}
+
+.hidden {
+    display: none;
+}
+

@@ -16,7 +16,8 @@
   --bg: #252527;
   --clr-1: #a2a2a3;
   --clr-2: #e7e7ec;
-  --clr-3: #f7c223;;
+  --clr-3: #f7c223;
+  --clr-neck: rgb(44, 31, 26);
 }
 
 html {
