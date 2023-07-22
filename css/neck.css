@@ -1,20 +1,10 @@
-:root {
-    --bg: #252527;
-    --clr-1: #a2a2a3;
-    --clr-2: #e7e7ec;
-    --clr-3: #f7c223;;
-    --clr-neck: rgb(44, 31, 26);
-}
-
-body {
-    background-color: var(--bg);
-}
-
-.guitar-neck {
+.guitar-neck__inner {
     display: flex;
     color: var(--clr-3);
+    margin-top: 40px;
     justify-content: center;
     margin-bottom: 100px;
+
 }
 
 .fret-number {
@@ -22,9 +12,10 @@ body {
     color: var(--clr-1);
 }
 
-.fret_0, .fret_3, .fret_5, .fret_7, .fret_9, .fret_12{
+.fret_3, .fret_5, .fret_7, .fret_9, .fret_12{
     background-color: var(--clr-neck);
 }
+
 
 .string {
     position: relative;
@@ -56,6 +47,18 @@ body {
     line-height: 1.8;
     z-index: 1;
 }
+
+.fret_0 .string {
+    border: none;
+}
+
+.fret_0 .note {
+    border: none;
+    font-weight: bold;
+    font-size: 20px;
+    bottom: 7px;
+}
+
 
 .hidden {
     display: none;

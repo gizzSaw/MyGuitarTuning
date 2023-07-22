@@ -102,6 +102,7 @@ body {
 
 .control {
   border-top: 1px solid var(--clr-2);
+  border-bottom: 1px solid var(--clr-2);
 }
 
 .control__inner {
