@@ -1,13 +1,15 @@
+/* одно семейство с двумя начертаниями: font-weight: bold сам подхватит Helvetica-Bold.
+   local() — если Helvetica уже есть в системе (macOS/iOS), файл не скачивается */
 @font-face {
-  font-family: "Helvetica", sans-serif;
-  src: url(../fonts/helvetica.woff2);
+  font-family: "Helvetica";
+  src: local("Helvetica"), url(../fonts/Helvetica.ttf) format("truetype");
   font-style: normal;
   font-weight: 400;
 }
 
 @font-face {
-  font-family: "Helvetica-Bold", sans-serif;
-  src: url(../fonts/helvetica-bold.woff2);
+  font-family: "Helvetica";
+  src: local("Helvetica Bold"), local("Helvetica-Bold"), url(../fonts/Helvetica-Bold.ttf) format("truetype");
   font-style: normal;
   font-weight: 700;
 }
@@ -145,5 +147,16 @@ body {
 @media (max-width: 500px) {
   .app__img {
     width: 200px;
+    /* разрешаем картинке сжиматься, если окошкам нот не хватает места */
+    min-width: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .app__notes-item {
+    width: 48px;
+    height: 48px;
+    margin: 6px;
+    font-size: 22px;
   }
 }

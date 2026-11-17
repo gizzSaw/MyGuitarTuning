@@ -14,33 +14,29 @@ const NOTES = [ 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B' 
 const strings = [string6,string5,string4,string3,string2,string1] 
 
 // изначально строй не дропнут
-let isDroped = false
-const changeDroped = () => {
-    if(isDroped) {
-        isDroped = false
-        dropBtn.textContent = 'Standart'
+let isDropped = false
+const changeDropped = () => {
+    if(isDropped) {
+        isDropped = false
+        dropBtn.textContent = 'Standard'
     } else {
-        isDroped = true
-        dropBtn.textContent = 'Droped'
+        isDropped = true
+        dropBtn.textContent = 'Drop'
     }
     changeTuning()
 }
-const returnNoteToOctave = (intrval, currentTuningIndex) => {
-    if(NOTES[currentTuningIndex + intrval]){
-        return NOTES[currentTuningIndex + intrval]
-    } else {
-        return NOTES[currentTuningIndex + intrval - NOTES.length]
+// остаток от деления на 12 возвращает ноту в пределы октавы при любом интервале
+const returnNoteToOctave = (interval, currentTuningIndex) => {
+    return NOTES[(currentTuningIndex + interval) % NOTES.length]
+}
+//отделить корректировку индекса, от записи значения в хтмл струну
+const writeCorrectNote = (intervals, currentTuningIndex) => {
+    for(let i = 0; i < intervals.length; i++) {
+        strings[i].textContent = returnNoteToOctave(intervals[i], currentTuningIndex)
     }
 }
-//отделить корректировку индекса, от записи значения в хтмл струну 
-const writeCorrectNote = (intrvals, currentTuningIndex) => {
-    for(let i = 0; i < intrvals.length; i++) {  
-        strings[i].textContent = returnNoteToOctave(intrvals[i], currentTuningIndex)
-        strings[i].textContent = returnNoteToOctave(intrvals[i], currentTuningIndex)
-    }
-}
-// интевралы для всех струн, если строй не дропнут.
-// посчитал на пальцах, там где больш 12, там вычел 12, получается та же нота, октава = 12 полутонов
+// интервалы для всех струн, если строй не дропнут.
+// посчитал на пальцах, там где больше 12, там вычел 12, получается та же нота, октава = 12 полутонов
 const setIntervals = () => {
     let interval6 = 0
     let interval5 =  5
@@ -48,10 +44,11 @@ const setIntervals = () => {
     let interval3 = 3
     let interval2 = 7
     let interval1 = 0
-    // если строй дроп, то интервалы меньше на 2 полутона 
-    if (isDroped) {
+    // если строй дроп, то 6-я струна опущена на тон,
+    // поэтому интервалы от неё до остальных струн больше на 2 полутона
+    if (isDropped) {
         interval5 += 2
-        interval4 += 2 //вот тут если бы была 3, то уже был бы баг при сложении с interval4
+        interval4 += 2
         interval3 += 2
         interval2 += 2
         interval1 += 2
@@ -76,15 +73,15 @@ const changeTuning = (direction) => {
     } else if (currentTuningIndex > NOTES.length - 1) {
         currentTuningIndex = 0 //в начало
     }
-    console.log(currentTuningIndex) // этот вывод пока очень важен, не удоляй
+    console.log(currentTuningIndex) // этот вывод пока очень важен, не удаляй
     
     currentTuning.textContent = string6.textContent = NOTES[currentTuningIndex]
 
-    //задаём интервалы для standart/drop
+    //задаём интервалы для standard/drop
     const {interval6,interval5, interval4,interval3,interval2,interval1} = setIntervals()
-    const intrvals = [interval6,interval5, interval4,interval3,interval2,interval1]
+    const intervals = [interval6,interval5, interval4,interval3,interval2,interval1]
 
-    writeCorrectNote(intrvals, currentTuningIndex)
+    writeCorrectNote(intervals, currentTuningIndex)
     
     /* изменение нот в строчке снизу */ 
     document.querySelector('.control__notes').textContent = (
@@ -95,7 +92,7 @@ const changeTuning = (direction) => {
         string2.textContent + " " +
         string1.textContent 
     )
-    //вызов метода из neck.js
+    //перерисовка грифа (функция объявлена ниже в этом же файле)
     changeNotesOnNeck()
 }
 
@@ -112,11 +109,11 @@ nextBtn.addEventListener('click', () => {
 })
 
 dropBtn.addEventListener('click', () => {
-    changeDroped('prev')
+    changeDropped()
 })
 
 
-//так можно докопатья до конкретной ноты на конкрутном ладу и струне
+//так можно докопаться до конкретной ноты на конкретном ладу и струне
 // 0 лад
 const fret0string1 = document.querySelector('.fret_0 .string1 .note')
 const fret0string2 = document.querySelector('.fret_0 .string2 .note')
@@ -447,7 +444,7 @@ currentTuning.forEach((item, index) => {
 //получить ноты из хтмл первого приложения
 //от нулевого лада получить струну, и как то в неё это запихнуть 
 //тоже самое для всех струн
-//потом прикрутит расчёт тональностей, 
+//потом прикрутить расчёт тональностей,
 //в котором сначала выбрать элементы для удаления, а потом повесить им класс хидден
 
 // inners.forEach((item) => {

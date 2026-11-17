@@ -26,17 +26,16 @@
 }
 
 .string1 {
-    border: none;
     background-color: var(--bg);
     border: 1px solid var(--bg);
 }
-  
+
+/* нота по центру лада по горизонтали и на линии струны (нижней границе клетки) по вертикали */
 .note {
     position: absolute;
     bottom: 0px;
-    left: 25%;
-    transform: translateX(-50%);
-    transform: translateY(50%);
+    left: 50%;
+    transform: translate(-50%, 50%);
     width: 30px;
     height: 30px;
     background-color: var(--bg);
@@ -71,7 +70,6 @@
         width: 23px;
         height: 23px;
         font-size: 13px;
-        left: 20%;
     }
     .fret_0 .note {
         background-color: transparent;
@@ -88,7 +86,6 @@
         width: 23px;
         height: 23px;
         font-size: 11px;
-        left: 16%;
     }
     .fret_0 .note {
         font-size: 15px;
@@ -104,9 +101,8 @@
     }
     .note {
         width: 16px;
-        height: 17px;
+        height: 16px;
         font-size: 9px;
-        left: 12%;
     }
     .fret_0 .note {
         font-size: 14px;
