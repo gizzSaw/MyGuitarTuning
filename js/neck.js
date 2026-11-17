@@ -1,6 +1,6 @@
-/* Карточки «Key» и «Chord» и подсветка грифа.
-   Порядок скриптов: theory.js → neck.js → main.js. main.js вызывает highlightNeck() после каждой
-   перерисовки грифа, поэтому этот файл должен быть загружен раньше него.
+/* Карточки «Key» и «Chord» и подсветка грифа и пианино.
+   Порядок скриптов: theory.js → piano.js → neck.js → main.js → sound.js. main.js вызывает highlightNeck()
+   после каждой перерисовки грифа, поэтому этот файл должен быть загружен раньше него.
    Имена констант не должны совпадать с именами в main.js (у скриптов общая область видимости). */
 
 const neckNotes = document.querySelectorAll('.guitar-neck .note')
@@ -47,8 +47,12 @@ const makeElement = (tag, className, text) => {
 
 const makeHint = text => makeElement('span', 'hint', text)
 
-// фишка ноты; у основного тона — красная
-const makeChip = (note, isRoot) => makeElement('span', isRoot ? 'chip chip_root' : 'chip', note)
+// фишка ноты (кнопка: по нажатию звучит, см. sound.js); у основного тона — красная
+const makeChip = (note, isRoot) => {
+    const chip = makeElement('button', isRoot ? 'chip chip_root' : 'chip', note)
+    chip.type = 'button'
+    return chip
+}
 
 const setPressed = (buttons, isPressed) => buttons.forEach(btn => btn.setAttribute('aria-pressed', isPressed(btn)))
 
@@ -133,6 +137,7 @@ const highlightNeck = () => {
         note.classList.toggle('note_key', isContext)
         note.classList.toggle('note_out', mainRoot !== '' && !isMain && !isContext)
     })
+    highlightPiano(mainRoot, mainNotes, contextNotes)
 
     renderKeyNotes(keyRoot, scaleNotes)
     renderKeyChords(keyRoot)

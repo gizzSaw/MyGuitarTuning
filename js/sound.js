@@ -1,7 +1,8 @@
-/* Звук: струны (карточка «Tuning»), гамма тональности («Key») и аккорды («Chord»).
-   Звук синтезируется алгоритмом Карплуса — Стронга (модель дёрнутой струны), аудиофайлов нет.
-   Подключается последним: пользуется NOTES (main.js), SCALES/CHORDS/getKeyChords (theory.js),
-   а также select'ами, keyType/chordSize, neckNotes и highlightNeck() из neck.js. */
+/* Звук: струны (карточка «Tuning»), гамма и ноты тональности («Key»), аккорды и их ноты («Chord»),
+   ноты на грифе и клавиши пианино. Звук синтезируется алгоритмом Карплуса — Стронга
+   (модель дёрнутой струны), аудиофайлов нет.
+   Подключается последним: пользуется NOTES/SCALES/CHORDS/getKeyChords (theory.js), select'ами,
+   keyType/chordSize, neckNotes и highlightNeck() из neck.js. */
 
 // высота открытых струн в стандартном строе, MIDI-номера: E2 A2 D3 G3 B3 E4
 const STANDARD_MIDI = { 6: 40, 5: 45, 4: 50, 3: 55, 2: 59, 1: 64 }
@@ -166,6 +167,9 @@ const flashNeckNotes = names => neckNotes.forEach(note => {
     if (names.includes(note.textContent)) flash(note, 'note_playing')
 })
 
+// нажать клавишу пианино с этой высотой (если она есть на клавиатуре)
+const flashPianoKey = midi => flash(document.querySelector(`.piano__key[data-midi="${midi}"]`), 'piano__key_playing')
+
 const later = (callback, ms) => sequenceTimers.push(setTimeout(callback, ms))
 
 const stopSequence = () => {
@@ -189,6 +193,7 @@ const pluckString = box => {
     ringingStrings.set(string, playMidi(midi, ctx.currentTime))
 
     flash(box, 'app__notes-item_plucked')
+    flashPianoKey(midi)
     soundStatus.textContent = describeString(box, midi) + (box === repeatBox ? ' · repeating' : '')
 }
 
@@ -237,6 +242,7 @@ const playScale = () => {
             const chips = document.querySelectorAll('.key__notes .chip')
             flash(chips[i % chips.length], 'chip_playing')
             flashNeckNotes([NOTES[(rootMidi + interval) % 12]])
+            flashPianoKey(rootMidi + interval)
         }, (when - ctx.currentTime) * 1000)
     })
 }
@@ -255,7 +261,9 @@ const strumChord = (root, quality) => {
     const ctx = getAudio()
     chordVoices.forEach(voice => releaseVoice(voice))
     const start = ctx.currentTime + 0.03
-    chordVoices = getChordVoicing(root, quality).map((midi, i) => playMidi(midi, start + i * CHORD_STRUM, 0.45))
+    const voicing = getChordVoicing(root, quality)
+    chordVoices = voicing.map((midi, i) => playMidi(midi, start + i * CHORD_STRUM, 0.45))
+    voicing.forEach(flashPianoKey)
     document.querySelectorAll('.chord__notes .chip').forEach(chip => flash(chip, 'chip_playing'))
     flashNeckNotes(getChordNotes(root, quality))
 }
@@ -277,20 +285,70 @@ const playKeyChords = () => {
     }, i * CHORD_STEP * 1000))
 }
 
+/* ---------- отдельные ноты: фишки, гриф, пианино ---------- */
+
+// сыграть одну ноту и подсветить то, на что нажали
+const playNote = (midi, element, flashClass) => {
+    stopSequence()
+    playMidi(midi, getAudio().currentTime)
+    flash(element, flashClass)
+    flashPianoKey(midi)
+}
+
+// фишки нот звучат в той же октаве, что и гамма: тоника — в 3-й октаве (C3…B3)
+const chipMidi = (root, intervals, chip) => {
+    const index = [...chip.closest('.key__notes, .chord__notes').querySelectorAll('.chip')].indexOf(chip)
+    return 48 + NOTES.indexOf(root) + intervals[index]
+}
+
+// нота на грифе: открытая струна этой строки + номер лада
+const neckNoteMidi = note => {
+    const string = [...note.closest('.string').classList].find(name => /^string\d$/.test(name)).slice(6)
+    const fret = Number([...note.closest('.fret').classList].find(name => /^fret_\d+$/.test(name)).slice(5))
+    return getStringMidi(document.querySelector(`.app__notes-item_string${string}`)) + fret
+}
+
+/* Нажатие: мышью — сразу на pointerdown (без задержки до отпускания кнопки), пальцем — по click,
+   чтобы прокрутка длинного грифа на телефоне не играла ноты, клавиатурой — по click (detail === 0). */
+let pressedWithMouse = false
+const onPress = (container, selector, handler) => {
+    container.addEventListener('pointerdown', event => {
+        pressedWithMouse = event.pointerType === 'mouse'
+        if (!pressedWithMouse || event.button !== 0) return
+        const target = event.target.closest(selector)
+        if (target) handler(target)
+    })
+    container.addEventListener('click', event => {
+        if (pressedWithMouse && event.detail !== 0) return // мышью уже сыграли на pointerdown
+        const target = event.target.closest(selector)
+        if (target) handler(target)
+    })
+}
+
 /* ---------- обработчики ---------- */
 
-stringBoxes.forEach(box => {
-    box.addEventListener('click', () => {
-        stopSequence()
-        if (!isRepeatOn) {
-            pluckString(box)
-        } else if (repeatBox === box) {
-            stopRepeat()
-        } else {
-            startRepeat(box)
-        }
-    })
+onPress(document.querySelector('.app__inner'), '.app__notes-item', box => {
+    stopSequence()
+    if (!isRepeatOn) {
+        pluckString(box)
+    } else if (repeatBox === box) {
+        stopRepeat()
+    } else {
+        startRepeat(box)
+    }
 })
+
+onPress(document.querySelector('.key__notes'), '.chip', chip =>
+    playNote(chipMidi(keyRootSelect.value, SCALES[keyType], chip), chip, 'chip_playing'))
+
+onPress(document.querySelector('.chord__notes'), '.chip', chip =>
+    playNote(chipMidi(chordRootSelect.value, CHORDS[chordQualitySelect.value].intervals, chip), chip, 'chip_playing'))
+
+onPress(document.querySelector('.guitar-neck__inner'), '.note', note =>
+    playNote(neckNoteMidi(note), note, 'note_playing'))
+
+onPress(document.querySelector('.piano__keys'), '.piano__key', key =>
+    playNote(Number(key.dataset.midi), key, 'piano__key_playing'))
 
 repeatBtn.addEventListener('click', () => {
     isRepeatOn = !isRepeatOn

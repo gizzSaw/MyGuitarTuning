@@ -416,6 +416,7 @@ body {
   font-size: 14px;
   font-weight: 700;
   color: var(--accent-ink);
+  cursor: pointer; /* фишка — кнопка: по нажатию звучит нота (sound.js) */
 }
 
 .chip_root {
@@ -595,6 +596,10 @@ body {
     color: var(--text);
   }
 
+  .chip:hover {
+    filter: brightness(1.1);
+  }
+
   .control__btn:hover,
   .app__notes-item:hover,
   .sound__btn:hover:not([aria-pressed="true"]):not(:disabled),
@@ -604,20 +609,22 @@ body {
   }
 }
 
-/* широкий экран: «Tuning» слева на две строки, справа «Key» и «Chord», гриф снизу во всю ширину */
+/* широкий экран: «Tuning» слева на две строки, справа «Key» и «Chord», гриф и пианино снизу во всю ширину */
 @media (min-width: 900px) {
   .main {
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
       "tuning key"
       "tuning chord"
-      "neck neck";
+      "neck neck"
+      "piano piano";
   }
 
   .tuning { grid-area: tuning; }
   .key { grid-area: key; }
   .chord { grid-area: chord; }
   .guitar-neck { grid-area: neck; }
+  .piano { grid-area: piano; }
 }
 
 @media (max-width: 400px) {

@@ -11,8 +11,7 @@ const string4 = document.querySelector('.app__notes-item_string4')
 const string3 = document.querySelector('.app__notes-item_string3')
 const string2 = document.querySelector('.app__notes-item_string2')
 const string1 = document.querySelector('.app__notes-item_string1')
-/*Массив всех нот*/
-const NOTES = [ 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B' ]
+/*Массив всех нот NOTES объявлен в theory.js — он подключается раньше этого файла*/
 const strings = [string6,string5,string4,string3,string2,string1] 
 
 // изначально строй не дропнут

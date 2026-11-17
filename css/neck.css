@@ -117,6 +117,7 @@
     font-size: var(--note-font);
     font-weight: 600;
     line-height: 1;
+    cursor: pointer; /* по нажатию звучит нота этого лада (sound.js) */
     transition: background-color var(--ease), border-color var(--ease), color var(--ease), box-shadow var(--ease);
 }
 
@@ -189,6 +190,12 @@
 
 .fret_0 .note.note_playing {
     animation: none;
+}
+
+@media (hover: hover) {
+    .note:hover {
+        filter: brightness(1.25);
+    }
 }
 
 @media (max-width: 760px) {
