@@ -2,18 +2,25 @@
    ноты на грифе и клавиши пианино. Звук синтезируется алгоритмом Карплуса — Стронга
    (модель дёрнутой струны), аудиофайлов нет.
    Подключается последним: пользуется NOTES/SCALES/CHORDS/getKeyChords (theory.js), select'ами,
-   chordSize, neckNotes и highlightNeck() из neck.js. */
-
-// высота открытых струн в стандартном строе, MIDI-номера: E2 A2 D3 G3 B3 E4
-const STANDARD_MIDI = { 6: 40, 5: 45, 4: 50, 3: 55, 2: 59, 1: 64 }
+   chordSize, neckNotes, highlightNeck() и getShapeVoicing() из neck.js. */
 
 const REPEAT_INTERVAL = 2500 // мс между повторами струны в режиме Repeat
 const STRUM_INTERVAL = 350   // мс между струнами в Play all
 const SCALE_STEP = 0.32      // с между нотами гаммы
 const CHORD_STRUM = 0.035    // с между нотами аккорда — как удар по струнам сверху вниз
+const BASS_ARPEGGIO_STEP = 0.15 // с между нотами аккорда на басу: арпеджио снизу вверх, ноты звучат дальше
+
+/* Тембры щипка. Динамики ноутбука и телефона не воспроизводят основной тон баса (30–60 Гц), высоту ухо
+   восстанавливает по гармоникам; у щипка Карплуса — Стронга их и так много (~97% энергии выше 150 Гц).
+   Бас ярче (начальный шум меньше сглажен) и звучит дольше: в полосе 150–4000 Гц хвост ноты громче на
+   ~2 дБ через секунду и на 6–7 дБ через 2 с. Подъём середины фильтром давал лишь 0,5–1 дБ — не стали.
+   Ни яркость, ни длительность не меняют период колебаний: высота точная (проверено, в том числе B0 и A0). */
+const PLUCK_TIMBRES = {
+    guitar: { smoothing: 0.5, decayTime: 3.5 },
+    bass: { smoothing: 0.15, decayTime: 4.5 },
+}
 const CHORD_STEP = 1.4       // с между аккордами тональности в Play all
 
-const stringBoxes = document.querySelectorAll('.app__notes-item')
 const playAllBtn = document.querySelector('.sound__all')
 const repeatBtn = document.querySelector('.sound__repeat')
 const soundStatus = document.querySelector('.sound__status')
@@ -24,7 +31,7 @@ const chordPlayAllBtn = document.querySelector('.chord__play-all')
 
 let audioCtx = null
 let masterGain = null
-const pluckBuffers = new Map()   // MIDI-номер -> готовый AudioBuffer
+const pluckBuffers = new Map()   // 'тембр:MIDI' -> готовый AudioBuffer
 const activeVoices = new Set()   // все звучащие и запланированные ноты
 const ringingStrings = new Map() // номер струны -> её звучащая нота (чтобы перезапустить, а не наложить)
 let chordVoices = []             // ноты последнего аккорда — гасим их, когда звучит следующий
@@ -33,16 +40,10 @@ let isRepeatOn = false
 let repeatTimer = null
 let repeatBox = null
 
-/* MIDI-номер ноты на струне. Приложение знает только название ноты, поэтому октаву выбираем
-   ближайшую к стандартной высоте этой струны: от 6 полутонов ниже до 5 выше
-   (вниз перестраивать безопаснее для струн). Drop D -> D2 A2 D3 G3 B3 E4. */
-const getStringMidi = box => {
-    const standard = STANDARD_MIDI[box.dataset.string]
-    const noteIndex = NOTES.indexOf(box.textContent.trim())
-    let delta = (noteIndex - (standard % 12) + 12) % 12
-    if (delta > 5) delta -= 12
-    return standard + delta
-}
+/* MIDI-номер ноты на струне: октава — ближайшая к стандартной высоте этой струны у текущего инструмента
+   (nearestMidi — в theory.js, getStandardMidi — в instrument.js). Drop D гитары -> D2 A2 D3 G3 B3 E4,
+   Drop D баса -> D1 A1 D2 G2. */
+const getStringMidi = box => nearestMidi(pitchOf(box.textContent.trim()), getStandardMidi(Number(box.dataset.string)))
 
 const midiToFrequency = midi => 440 * 2 ** ((midi - 69) / 12)
 
@@ -53,9 +54,9 @@ const midiToName = midi => NOTES[midi % 12] + (Math.floor(midi / 12) - 1)
    а на каждом проходе соседние отсчёты усредняются — высокие гармоники гаснут быстрее низких,
    как у настоящей струны. Период почти никогда не равен целому числу отсчётов, поэтому
    дробный остаток добирает фазовый (allpass) фильтр: иначе нота звучала бы фальшиво на несколько центов. */
-const synthesizePluck = (frequency, sampleRate) => {
-    const duration = 4      // секунды
-    const decayTime = 3.5   // за сколько секунд основной тон затихает на 60 дБ
+const synthesizePluck = (frequency, sampleRate, timbre = PLUCK_TIMBRES.guitar) => {
+    const duration = 4                    // секунды
+    const decayTime = timbre.decayTime    // за сколько секунд основной тон затихает на 60 дБ
     const length = Math.floor(duration * sampleRate)
     const samples = new Float32Array(length)
 
@@ -66,11 +67,11 @@ const synthesizePluck = (frequency, sampleRate) => {
     const allpass = (1 - fraction) / (1 + fraction)
     const loss = 10 ** (-3 / (decayTime * frequency)) // затухание за один период
 
-    // щипок: шум, слегка сглаженный (мягче, как пальцем), без постоянной составляющей
+    // щипок: шум, сглаженный (мягче, как пальцем; у баса меньше — ярче), без постоянной составляющей
     const line = new Float32Array(delayLength)
     let smooth = 0
     for (let i = 0; i < delayLength; i++) {
-        smooth = 0.5 * smooth + 0.5 * (Math.random() * 2 - 1)
+        smooth = timbre.smoothing * smooth + (1 - timbre.smoothing) * (Math.random() * 2 - 1)
         line[i] = smooth
     }
     const mean = line.reduce((sum, value) => sum + value, 0) / delayLength
@@ -121,26 +122,32 @@ const getAudio = () => {
     return audioCtx
 }
 
-const getPluckBuffer = midi => {
-    if (!pluckBuffers.has(midi)) {
-        const samples = synthesizePluck(midiToFrequency(midi), audioCtx.sampleRate)
+const getPluckBuffer = (midi, timbre) => {
+    const key = `${timbre}:${midi}`
+    if (!pluckBuffers.has(key)) {
+        const samples = synthesizePluck(midiToFrequency(midi), audioCtx.sampleRate, PLUCK_TIMBRES[timbre])
         const buffer = audioCtx.createBuffer(1, samples.length, audioCtx.sampleRate)
         buffer.copyToChannel(samples, 0)
-        pluckBuffers.set(midi, buffer)
+        pluckBuffers.set(key, buffer)
     }
-    return pluckBuffers.get(midi)
+    return pluckBuffers.get(key)
 }
 
-// сыграть ноту в момент when (секунды по часам AudioContext); возвращает «голос», чтобы его можно было погасить
-const playMidi = (midi, when, volume = 1) => {
+// тембр и октава звуков текущего инструмента: бас — свой тембр и на октаву ниже гитары (фишки, гамма, аккорды)
+const instrumentTimbre = () => (isBass() ? 'bass' : 'guitar')
+const instrumentOctave = () => (isBass() ? -12 : 0)
+
+/* Сыграть ноту в момент when (секунды по часам AudioContext) тембром timbre ('guitar' | 'bass');
+   возвращает «голос», чтобы его можно было погасить. midi и timbre в голосе — для проверок. */
+const playMidi = (midi, when, volume = 1, timbre = instrumentTimbre()) => {
     const ctx = getAudio()
     const source = ctx.createBufferSource()
-    source.buffer = getPluckBuffer(midi)
+    source.buffer = getPluckBuffer(midi, timbre)
     const gain = ctx.createGain()
     gain.gain.value = volume
     source.connect(gain).connect(masterGain)
     source.start(when)
-    const voice = { source, gain }
+    const voice = { source, gain, midi, timbre, when }
     activeVoices.add(voice)
     source.onended = () => activeVoices.delete(voice)
     return voice
@@ -162,13 +169,21 @@ const flash = (element, className) => {
     element.classList.add(className)
 }
 
-// подсветить на грифе все места, где лежат эти ноты
-const flashNeckNotes = names => neckNotes.forEach(note => {
-    if (names.includes(note.textContent)) flash(note, 'note_playing')
+// подсветить на грифе все места с этими высотами (0–11); по названию нельзя — на грифе может быть B♭, а не A♯
+const flashNeckNotes = pitches => neckNotes.forEach(note => {
+    if (pitches.includes(pitchOf(note.textContent))) flash(note, 'note_playing')
 })
 
-// нажать клавишу пианино с этой высотой (если она есть на клавиатуре)
-const flashPianoKey = midi => flash(document.querySelector(`.piano__key[data-midi="${midi}"]`), 'piano__key_playing')
+/* Нажать клавишу пианино с этой нотой. Если такой высоты на видимой клавиатуре нет (бас ниже C3, высокие
+   ноты выше C5, на телефоне видна одна октава) — та же нота в ближайшей видимой октаве. */
+const flashPianoKey = midi => {
+    const visible = [...document.querySelectorAll('.piano__key')]
+        .filter(key => key.dataset.midi % 12 === midi % 12 && key.offsetParent !== null)
+    if (!visible.length) return
+    const nearest = visible.reduce((best, key) =>
+        (Math.abs(key.dataset.midi - midi) < Math.abs(best.dataset.midi - midi) ? key : best))
+    flash(nearest, 'piano__key_playing')
+}
 
 const later = (callback, ms) => sequenceTimers.push(setTimeout(callback, ms))
 
@@ -230,7 +245,7 @@ const playScale = () => {
     const root = keyRootSelect.value
     if (!root) return
     const ctx = getAudio()
-    const rootMidi = 48 + NOTES.indexOf(root)
+    const rootMidi = 48 + instrumentOctave() + NOTES.indexOf(root) // гитара C3…B3, бас C2…B2
     // гамма любой длины (5–7 ступеней) и сверху октава тоники
     const steps = [...SCALES[keyTypeSelect.value], 12]
     const start = ctx.currentTime + 0.05
@@ -242,31 +257,38 @@ const playScale = () => {
         later(() => {
             const chips = document.querySelectorAll('.key__notes .chip')
             flash(chips[i % chips.length], 'chip_playing')
-            flashNeckNotes([NOTES[(rootMidi + interval) % 12]])
+            flashNeckNotes([(rootMidi + interval) % 12])
             flashPianoKey(rootMidi + interval)
         }, (when - ctx.currentTime) * 1000)
     })
 }
 
-/* Расположение нот аккорда как на гитаре: основной тон в басу (E2…D#3), над ним квинта,
-   октава, а сверху терция, квинта и септима. E -> E2 B2 E3 G#3 B3, как открытый аккорд E. */
+/* Запасное расположение нот, если аппликатуры нет (см. strumChord; на басу — всегда): основной тон в басу
+   (гитара E2…D♯3, бас — на октаву ниже), над ним квинта,
+   октава, а сверху терция, квинта и септима. E -> E2 B2 E3 G♯3 B3, как открытый аккорд E. */
 const getChordVoicing = (root, quality) => {
-    const bass = 40 + (NOTES.indexOf(root) - 4 + 12) % 12
+    const bass = 40 + instrumentOctave() + (NOTES.indexOf(root) - 4 + 12) % 12 // гитара E2…D♯3, бас E1…D♯2
     const [, third, fifth, seventh] = CHORDS[quality].intervals
     const voicing = [bass, bass + fifth, bass + 12, bass + 12 + third, bass + 12 + fifth]
     if (seventh !== undefined) voicing.push(bass + 12 + seventh)
     return voicing
 }
 
+/* Бой по выбранной аппликатуре (getShapeVoicing из neck.js): ноты с конкретных струн и ладов, от баса вверх;
+   на грифе вспыхивают именно эти клетки. Если позиций нет — запасное расположение getChordVoicing. */
 const strumChord = (root, quality) => {
     const ctx = getAudio()
     chordVoices.forEach(voice => releaseVoice(voice))
     const start = ctx.currentTime + 0.03
-    const voicing = getChordVoicing(root, quality)
-    chordVoices = voicing.map((midi, i) => playMidi(midi, start + i * CHORD_STRUM, 0.45))
+    const shapeNotes = getShapeVoicing()
+    const voicing = shapeNotes ? shapeNotes.map(note => note.midi) : getChordVoicing(root, quality)
+    // гитара — бой (почти вместе), бас — арпеджио: аккорд из низких нот вместе звучит грязно
+    const step = isBass() ? BASS_ARPEGGIO_STEP : CHORD_STRUM
+    chordVoices = voicing.map((midi, i) => playMidi(midi, start + i * step, 0.45))
     voicing.forEach(flashPianoKey)
     document.querySelectorAll('.chord__notes .chip').forEach(chip => flash(chip, 'chip_playing'))
-    flashNeckNotes(getChordNotes(root, quality))
+    if (shapeNotes) shapeNotes.forEach(note => flash(note.note, 'note_playing'))
+    else flashNeckNotes(voicing.map(midi => midi % 12))
 }
 
 const playSelectedChord = () => {
@@ -296,18 +318,15 @@ const playNote = (midi, element, flashClass) => {
     flashPianoKey(midi)
 }
 
-// фишки нот звучат в той же октаве, что и гамма: тоника — в 3-й октаве (C3…B3)
+// фишки нот звучат в той же октаве, что и гамма: тоника — C3…B3 у гитары, C2…B2 у баса
 const chipMidi = (root, intervals, chip) => {
     const index = [...chip.closest('.key__notes, .chord__notes').querySelectorAll('.chip')].indexOf(chip)
-    return 48 + NOTES.indexOf(root) + intervals[index]
+    return 48 + instrumentOctave() + NOTES.indexOf(root) + intervals[index]
 }
 
-// нота на грифе: открытая струна этой строки + номер лада
-const neckNoteMidi = note => {
-    const string = [...note.closest('.string').classList].find(name => /^string\d$/.test(name)).slice(6)
-    const fret = Number([...note.closest('.fret').classList].find(name => /^fret_\d+$/.test(name)).slice(5))
-    return getStringMidi(document.querySelector(`.app__notes-item_string${string}`)) + fret
-}
+// нота на грифе: открытая струна этой строки + номер лада (data-string и data-fret ставит fretboard.js)
+const neckNoteMidi = note =>
+    getStringMidi(document.querySelector(`.app__notes-item_string${note.dataset.string}`)) + Number(note.dataset.fret)
 
 /* Нажатие: мышью — сразу на pointerdown (без задержки до отпускания кнопки), пальцем — по click,
    чтобы прокрутка длинного грифа на телефоне не играла ноты, клавиатурой — по click (detail === 0). */
@@ -357,10 +376,10 @@ repeatBtn.addEventListener('click', () => {
     if (!isRepeatOn) stopRepeat()
 })
 
-// все струны по очереди, с 6-й (толстой) по 1-ю
+// все струны по очереди, с самой толстой по 1-ю
 playAllBtn.addEventListener('click', () => {
     stopPlayback()
-    const order = [...stringBoxes].sort((a, b) => b.dataset.string - a.dataset.string)
+    const order = getStringBoxes().reverse() // от самой толстой струны; окошек столько, сколько струн у инструмента
     order.forEach((box, i) => later(() => pluckString(box), i * STRUM_INTERVAL))
 })
 
@@ -386,6 +405,12 @@ document.querySelector('.chord__list').addEventListener('click', event => {
     stopSequence()
     playSelectedChord()
 })
+
+// переключили позицию ← → — сразу играем её (обработчик neck.js подключён раньше и уже сменил позицию)
+document.querySelectorAll('.chord__shape-btn').forEach(btn => btn.addEventListener('click', () => {
+    stopSequence()
+    playSelectedChord()
+}))
 
 // пользователь что-то поменял сам — последовательность (Play all, гамма, аккорды тональности) прерываем
 ;[keyRootSelect, keyTypeSelect, chordRootSelect, chordQualitySelect].forEach(select => select.addEventListener('change', stopSequence))

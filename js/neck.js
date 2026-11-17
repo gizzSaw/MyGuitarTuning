@@ -1,9 +1,24 @@
 /* Карточки «Key» и «Chord» и подсветка грифа и пианино.
-   Порядок скриптов: theory.js → piano.js → neck.js → main.js → sound.js. main.js вызывает highlightNeck()
+   Порядок скриптов: theory.js → shapes.js → fretboard.js → instrument.js → piano.js → neck.js → main.js → sound.js.
+   main.js вызывает highlightNeck()
    после каждой перерисовки грифа, поэтому этот файл должен быть загружен раньше него.
    Имена констант не должны совпадать с именами в main.js (у скриптов общая область видимости). */
 
-const neckNotes = document.querySelectorAll('.guitar-neck .note')
+/* Клетки грифа (его строит fretboard.js): нота, номер струны (1 — самая тонкая) и лад из data-*.
+   let, а не const: при перестройке грифа (другое число струн) их нужно собрать заново — refreshNeckCells(). */
+let neckNotes = []
+let neckCells = []
+let neckFretCount = 0
+const refreshNeckCells = () => {
+    neckNotes = [...document.querySelectorAll('.guitar-neck .note')]
+    neckCells = neckNotes.map(note => ({ note, string: Number(note.dataset.string), fret: Number(note.dataset.fret) }))
+    neckFretCount = Math.max(...neckCells.map(cell => cell.fret))
+}
+refreshNeckCells()
+
+// открытые струны текущего строя в MIDI, от 1-й струны: окошки и стандартный строй — у текущего инструмента (instrument.js)
+const getOpenMidis = () => getStringBoxes().map(box =>
+    nearestMidi(pitchOf(box.textContent.trim()), getStandardMidi(Number(box.dataset.string))))
 
 // тональность
 const keyRootSelect = document.querySelector('#keyRoot')
@@ -19,6 +34,18 @@ let chordSize = 3
 const chordKeyTitle = document.querySelector('.chord__key-title')
 const chordList = document.querySelector('.chord__list')
 const chordNotesLine = document.querySelector('.chord__notes')
+
+// аппликатуры (shapes.js): режим показа на грифе, найденные позиции и выбранная
+const chordShapeBar = document.querySelector('.chord__shape-bar')
+const chordViewBtns = document.querySelectorAll('.chord__view .segmented__btn') // All notes | Shape
+const chordShapeNav = document.querySelector('.chord__shape-nav')
+const chordShapeName = document.querySelector('.chord__shape-name')
+const chordShapeTab = document.querySelector('.chord__shape-tab')
+const chordShapeBtns = document.querySelectorAll('.chord__shape-btn') // ← →
+let chordView = 'all'
+let chordShapes = []
+let shapeIndex = 0
+let shapesFor = '' // для какого аккорда и строя посчитаны позиции: при смене — считаем заново с первой
 
 const neckLegend = document.querySelector('.legend')
 
@@ -63,14 +90,14 @@ const makeChip = (note, isRoot) => {
 const setPressed = (buttons, isPressed) => buttons.forEach(btn => btn.setAttribute('aria-pressed', isPressed(btn)))
 
 // ноты тональности под выбором тональности
-const renderKeyNotes = (keyRoot, scaleNotes) => {
+const renderKeyNotes = (keyRoot, keyPitches, keyNames) => {
     keyNotesLine.replaceChildren(...(keyRoot
-        ? scaleNotes.map((note, i) => makeChip(note, i === 0))
+        ? keyPitches.map((pitch, i) => makeChip(keyNames[pitch], i === 0))
         : [makeHint(keyHint)]))
 }
 
 // аккорды выбранной тональности: кнопки, по клику аккорд показывается на грифе
-const renderKeyChords = keyRoot => {
+const renderKeyChords = (keyRoot, keyPitches, keyNames) => {
     chordKeyTools.hidden = !keyRoot
     if (!keyRoot) {
         chordKeyTitle.textContent = 'Chords in key'
@@ -78,36 +105,37 @@ const renderKeyChords = keyRoot => {
         return
     }
     const keyType = keyTypeSelect.value
+    const tonic = keyNames[pitchOf(keyRoot)]
     // у пентатоник аккорды родительской тональности (см. getKeyChords) — так и подписываем
     const isPentatonic = keyType !== 'blues' && PARENT_SCALES[keyType]
     chordKeyTitle.textContent = isPentatonic
-        ? `Chords in ${keyRoot} ${SCALE_NAMES[PARENT_SCALES[keyType]]} (parent key)`
-        : `Chords in ${keyRoot} ${SCALE_NAMES[keyType]}`
+        ? `Chords in ${tonic} ${SCALE_NAMES[PARENT_SCALES[keyType]]} (parent key)`
+        : `Chords in ${tonic} ${SCALE_NAMES[keyType]}`
     chordList.replaceChildren(...getKeyChords(keyRoot, keyType, chordSize).map(chord => {
         const btn = makeElement('button', 'chord__item')
-        btn.dataset.root = chord.root
+        btn.dataset.root = chord.root // внутреннее название (NOTES), как value в select
         btn.dataset.quality = chord.quality
         btn.setAttribute('aria-pressed',
             chord.root === chordRootSelect.value && chord.quality === chordQualitySelect.value)
+        const rootName = spellChord(pitchOf(chord.root), chord.quality, keyNames, keyPitches)[0]
         btn.append(
             makeElement('span', 'chord__numeral', chord.numeral),
-            makeElement('span', 'chord__name', getChordName(chord.root, chord.quality)),
+            makeElement('span', 'chord__name', rootName + CHORDS[chord.quality].suffix),
         )
         return btn
     }))
 }
 
 // ноты аккорда со ступенями: G B D F / R 3 5 ♭7
-const renderChordNotes = chordRoot => {
+const renderChordNotes = (chordRoot, chordNames) => {
     if (!chordRoot) {
         chordNotesLine.replaceChildren(makeHint(chordHint))
         return
     }
-    const quality = chordQualitySelect.value
-    const degrees = getChordDegrees(quality)
-    chordNotesLine.replaceChildren(...getChordNotes(chordRoot, quality).map((note, i) => {
+    const degrees = getChordDegrees(chordQualitySelect.value)
+    chordNotesLine.replaceChildren(...chordNames.map((name, i) => {
         const tone = makeElement('span', 'chord__tone')
-        tone.append(makeChip(note, i === 0), makeElement('span', 'chord__degree', degrees[i]))
+        tone.append(makeChip(name, i === 0), makeElement('span', 'chord__degree', degrees[i]))
         return tone
     }))
 }
@@ -117,6 +145,7 @@ const LEGENDS = {
     key: [['root', 'Root'], ['tone', 'In key'], ['out', 'Other']],
     chord: [['root', 'Chord root'], ['tone', 'Chord tone'], ['out', 'Other']],
     chordInKey: [['root', 'Chord root'], ['tone', 'Chord tone'], ['key', 'In key'], ['out', 'Other']],
+    shape: [['root', 'Chord root'], ['tone', 'In shape'], ['dim', 'Chord tone'], ['out', 'Other']],
 }
 
 const renderLegend = mode => {
@@ -126,34 +155,95 @@ const renderLegend = mode => {
         makeElement('li', `legend__item legend__item_${kind}`, text)))
 }
 
-/* Подсветка грифа.
+// пересчитать аппликатуры, если сменился аккорд или строй. На басу аппликатур нет — только все ноты аккорда
+const updateChordShapes = (chordRoot, chordPitches) => {
+    const openMidis = getOpenMidis()
+    const key = chordRoot && !isBass() ? `${chordRoot}|${chordQualitySelect.value}|${openMidis.join()}` : ''
+    if (key === shapesFor) return
+    shapesFor = key
+    shapeIndex = 0
+    chordShapes = key ? findChordShapes(openMidis, pitchOf(chordRoot), chordPitches, neckFretCount) : []
+}
+
+// панель аппликатур: All notes | Shape и, в режиме Shape, ← название позиции, x32010, 1 / 5 →
+const renderShapeBar = chordRoot => {
+    chordShapeBar.hidden = !chordRoot || isBass()
+    chordShapeNav.hidden = chordView !== 'shape'
+    if (chordShapeBar.hidden || chordView !== 'shape') return
+    const shape = chordShapes[shapeIndex]
+    chordShapeName.textContent = shape ? describeShape(shape, getOpenMidis()) : `No playable shape up to fret ${neckFretCount}`
+    chordShapeTab.textContent = shape ? `${shapeToString(shape)} · ${shapeIndex + 1} / ${chordShapes.length}` : ''
+    chordShapeBtns.forEach(btn => { btn.disabled = chordShapes.length < 2 })
+}
+
+/* Выбранная аппликатура для звука (sound.js): ноты от баса вверх — MIDI и клетка грифа для вспышки.
+   null — аккорд не выбран или позиций нет. Звучит выбранная позиция и в режиме All notes. */
+const getShapeVoicing = () => {
+    const shape = chordRootSelect.value ? chordShapes[shapeIndex] : null
+    if (!shape) return null
+    const openMidis = getOpenMidis()
+    return shape.frets
+        .map((fret, i) => (fret === null ? null : {
+            midi: openMidis[i] + fret,
+            note: neckCells.find(cell => cell.string === i + 1 && cell.fret === fret).note,
+        }))
+        .filter(Boolean)
+        .sort((a, b) => a.midi - b.midi)
+}
+
+/* Подсветка грифа и пианино, подписи нот.
    Выбран аккорд — заливаем его ноты (основной тон красный), а ноты тональности, не входящие
-   в аккорд, обводим контуром. Аккорд не выбран — заливаем ноты тональности. Остальное серое. */
+   в аккорд, обводим контуром. Аккорд не выбран — заливаем ноты тональности. Остальное серое.
+   Сравниваем высоты (0–11), а не названия: на грифе может быть написано и B♭, и A♯.
+   Названия: без тональности — как раньше, с диезами (NOTES); с тональностью — по её правилам
+   (getKeyNames), а ноты выбранного аккорда — как в аккорде (D F♯ A в F major).
+   Режим Shape: залиты только ноты выбранной аппликатуры, остальные ноты аккорда приглушены (note_dim),
+   на ладу 0 у открытой играющей струны кольцо (note_open), у неиграющей — × (note_muted). */
 const highlightNeck = () => {
     const keyRoot = keyRootSelect.value     // '' — тональность не выбрана
     const chordRoot = chordRootSelect.value // '' — аккорд не выбран
-    const scaleNotes = keyRoot ? getScaleNotes(keyRoot, keyTypeSelect.value) : []
-    const chordNotes = chordRoot ? getChordNotes(chordRoot, chordQualitySelect.value) : []
+    const quality = chordQualitySelect.value
+    const keyPitches = keyRoot ? SCALES[keyTypeSelect.value].map(interval => (pitchOf(keyRoot) + interval) % 12) : []
+    const chordPitches = chordRoot ? CHORDS[quality].intervals.map(interval => (pitchOf(chordRoot) + interval) % 12) : []
 
-    const mainRoot = chordRoot || keyRoot
-    const mainNotes = chordRoot ? chordNotes : scaleNotes
-    const contextNotes = chordRoot ? scaleNotes : []
+    const keyNames = keyRoot ? getKeyNames(keyRoot, keyTypeSelect.value) : NOTES.slice()
+    const chordNames = !chordRoot ? []
+        : keyRoot ? spellChord(pitchOf(chordRoot), quality, keyNames, keyPitches)
+        : chordPitches.map(pitch => NOTES[pitch])
+    const noteNames = keyNames.slice()
+    chordPitches.forEach((pitch, i) => { noteNames[pitch] = chordNames[i] })
 
-    neckNotes.forEach(note => {
-        const name = note.textContent
-        const isMain = mainNotes.includes(name)
-        const isContext = !isMain && contextNotes.includes(name)
-        note.classList.toggle('note_root', name === mainRoot)
-        note.classList.toggle('note_tone', isMain && name !== mainRoot)
+    updateChordShapes(chordRoot, chordPitches)
+    const shape = chordRoot && chordView === 'shape' && !isBass() ? chordShapes[shapeIndex] : null
+
+    const mainRoot = chordRoot ? pitchOf(chordRoot) : keyRoot ? pitchOf(keyRoot) : -1 // -1 — ничего не выбрано
+    const mainPitches = chordRoot ? chordPitches : keyPitches
+    const contextPitches = chordRoot && !shape ? keyPitches : [] // в режиме Shape контур тональности не рисуем
+
+    neckCells.forEach(({ note, string, fret }) => {
+        const pitch = pitchOf(note.textContent)
+        note.textContent = noteNames[pitch]
+        const isChordTone = mainPitches.includes(pitch)
+        const shapeFret = shape ? shape.frets[string - 1] : undefined
+        const isMain = shape ? shapeFret === fret : isChordTone
+        const isContext = !isMain && contextPitches.includes(pitch)
+        const isDim = Boolean(shape) && !isMain && isChordTone
+        const isMuted = Boolean(shape) && fret === 0 && shapeFret === null
+        note.classList.toggle('note_root', isMain && pitch === mainRoot)
+        note.classList.toggle('note_tone', isMain && pitch !== mainRoot)
         note.classList.toggle('note_key', isContext)
-        note.classList.toggle('note_out', mainRoot !== '' && !isMain && !isContext)
+        note.classList.toggle('note_dim', isDim && !isMuted)
+        note.classList.toggle('note_out', mainRoot !== -1 && !isMain && !isContext && !isDim && !isMuted)
+        note.classList.toggle('note_open', Boolean(shape) && fret === 0 && shapeFret === 0)
+        note.classList.toggle('note_muted', isMuted)
     })
-    highlightPiano(mainRoot, mainNotes, contextNotes)
+    highlightPiano(mainRoot, mainPitches, contextPitches, noteNames)
 
-    renderKeyNotes(keyRoot, scaleNotes)
-    renderKeyChords(keyRoot)
-    renderChordNotes(chordRoot)
-    renderLegend(chordRoot ? (keyRoot ? 'chordInKey' : 'chord') : (keyRoot ? 'key' : ''))
+    renderKeyNotes(keyRoot, keyPitches, keyNames)
+    renderKeyChords(keyRoot, keyPitches, keyNames)
+    renderChordNotes(chordRoot, chordNames)
+    renderShapeBar(chordRoot)
+    renderLegend(shape ? 'shape' : chordRoot ? (keyRoot ? 'chordInKey' : 'chord') : (keyRoot ? 'key' : ''))
     keyPlayButton.disabled = !keyRoot
     chordPlayButton.disabled = !chordRoot
 }
@@ -167,6 +257,23 @@ chordSizeBtns.forEach(btn => {
     btn.addEventListener('click', () => {
         chordSize = Number(btn.dataset.size)
         setPressed(chordSizeBtns, other => other === btn)
+        highlightNeck()
+    })
+})
+
+chordViewBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        chordView = btn.dataset.view
+        setPressed(chordViewBtns, other => other === btn)
+        highlightNeck()
+    })
+})
+
+// ← → по кругу
+chordShapeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const step = btn.classList.contains('chord__shape-next') ? 1 : -1
+        shapeIndex = (shapeIndex + step + chordShapes.length) % chordShapes.length
         highlightNeck()
     })
 })

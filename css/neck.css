@@ -48,18 +48,14 @@
     background-color: var(--string);
 }
 
-.string1 { --gauge: 1px; }
-.string2 { --gauge: 1.5px; }
-.string3 { --gauge: 2px; }
-.string4 { --gauge: 2px; }
-.string5 { --gauge: 2.5px; }
-.string6 { --gauge: 3px; }
+/* --gauge (толщина струны) ставит fretboard.js на каждую клетку — от числа струн */
 
 .fret_0 .string::before {
     display: none;
 }
 
-/* перламутровые точки: одна на 3, 5, 7, 9 ладу, две на 12-м */
+/* перламутровые точки: одна на 3, 5, 7, 9 ладу, две на 12-м. Места поперёк грифа (--dot, --dot-a, --dot-b —
+   доли от 1-й струны) ставит fretboard.js от числа струн, чтобы точка была между струнами */
 .fret_3::after,
 .fret_5::after,
 .fret_7::after,
@@ -68,7 +64,7 @@
 .fret_12::after {
     content: "";
     position: absolute;
-    top: 50%;
+    top: var(--dot);
     left: 50%;
     width: 8px;  /* помещается в зазор между кружками нот на любой ширине */
     height: 8px;
@@ -77,8 +73,8 @@
     transform: translate(-50%, -50%);
 }
 
-.fret_12::before { top: 33.333%; }
-.fret_12::after { top: 66.667%; }
+.fret_12::before { top: var(--dot-a); }
+.fret_12::after { top: var(--dot-b); }
 
 /* номер лада стоит в клетке 1-й струны и выносится за край грифа */
 .fret-number {
@@ -159,10 +155,17 @@
     color: var(--muted);
 }
 
+/* режим Shape: ноты аккорда вне выбранной аппликатуры — приглушены, но видны */
+.note.note_dim {
+    border-color: var(--accent-dim);
+    color: var(--accent-dim);
+}
+
 /* на ладу 0 кружков нет — те же цвета у текста */
 .fret_0 .note.note_tone,
 .fret_0 .note.note_root,
 .fret_0 .note.note_key,
+.fret_0 .note.note_dim,
 .fret_0 .note.note_out {
     background-color: transparent;
     border-color: transparent;
@@ -172,6 +175,30 @@
 .fret_0 .note.note_tone { color: var(--accent); }
 .fret_0 .note.note_root { color: var(--root); }
 .fret_0 .note.note_key { color: var(--text); }
+
+/* режим Shape на ладу 0: открытая играющая струна — кольцо (O), неиграющая — × вместо названия.
+   Текст ноты остаётся в DOM (по нему считается высота), его только прячем */
+.fret_0 .note.note_open {
+    border: 2px solid var(--accent);
+}
+
+.fret_0 .note.note_open.note_root {
+    border-color: var(--root);
+}
+
+.fret_0 .note.note_muted {
+    color: transparent;
+}
+
+.fret_0 .note.note_muted::after {
+    content: "×";
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+    color: var(--text-muted);
+}
 
 /* нота звучит — расходящееся кольцо (только box-shadow: transform у .note занят центровкой) */
 .note.note_playing {
@@ -259,8 +286,17 @@
         text-align: left;
     }
 
-    .fret_12::before { top: 50%; left: 33.333%; }
-    .fret_12::after { top: 50%; left: 66.667%; }
+    /* струны идут справа налево (1-я справа), поэтому доли считаем от правого края */
+    .fret_3::after,
+    .fret_5::after,
+    .fret_7::after,
+    .fret_9::after {
+        top: 50%;
+        left: calc(100% - var(--dot));
+    }
+
+    .fret_12::before { top: 50%; left: calc(100% - var(--dot-a)); }
+    .fret_12::after { top: 50%; left: calc(100% - var(--dot-b)); }
 }
 
 @media (max-width: 360px) {

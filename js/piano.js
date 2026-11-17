@@ -4,10 +4,13 @@
 
 const PIANO_FIRST = 48 // C3 (MIDI)
 const PIANO_LAST = 72  // C5
-const BLACK_NOTES = [1, 3, 6, 8, 10] // C# D# F# G# A#
+const BLACK_NOTES = [1, 3, 6, 8, 10] // C♯ D♯ F♯ G♯ A♯
 
 const pianoKeysBox = document.querySelector('.piano__keys')
 const pianoKeys = []
+
+// подпись клавиши; на C — с октавой, чтобы было видно, где какая
+const pianoKeyLabel = (name, midi) => (name === 'C' ? name + (Math.floor(midi / 12) - 1) : name)
 
 // белые клавиши идут подряд, чёрные лежат поверх них на границе между белыми (--pos — номер этой границы)
 let whiteCount = 0
@@ -21,10 +24,8 @@ for (let midi = PIANO_FIRST; midi <= PIANO_LAST; midi++) {
     key.className = `piano__key ${isBlack ? 'piano__key_black' : 'piano__key_white'}`
     if (midi < 60) key.classList.add('piano__key_low') // нижняя октава — на узком экране скрыта
     key.dataset.midi = midi
-    key.dataset.note = note
     key.setAttribute('aria-label', note + octave)
-    // на C подписываем октаву, чтобы было видно, где какая
-    key.textContent = note === 'C' ? note + octave : note
+    key.textContent = pianoKeyLabel(note, midi)
 
     if (isBlack) {
         key.style.setProperty('--pos', whiteCount)
@@ -36,13 +37,17 @@ for (let midi = PIANO_FIRST; midi <= PIANO_LAST; midi++) {
 pianoKeysBox.style.setProperty('--whites', whiteCount)
 pianoKeysBox.append(...pianoKeys)
 
-// те же правила, что и на грифе: основной тон, ноты аккорда/тональности, ноты тональности вне аккорда
-const highlightPiano = (root, mainNotes, contextNotes) => {
+/* Те же правила, что и на грифе: основной тон, ноты аккорда/тональности, ноты тональности вне аккорда.
+   Сравниваем высоты (0–11); rootPitch -1 — ничего не выбрано. names — подписи по тональности (B♭ или A♯). */
+const highlightPiano = (rootPitch, mainPitches, contextPitches, names) => {
     pianoKeys.forEach(key => {
-        const note = key.dataset.note
-        const isMain = mainNotes.includes(note)
-        key.classList.toggle('piano__key_root', root !== '' && note === root)
-        key.classList.toggle('piano__key_tone', isMain && note !== root)
-        key.classList.toggle('piano__key_key', !isMain && contextNotes.includes(note))
+        const midi = Number(key.dataset.midi)
+        const pitch = midi % 12
+        const isMain = mainPitches.includes(pitch)
+        key.textContent = pianoKeyLabel(names[pitch], midi)
+        key.setAttribute('aria-label', names[pitch] + (Math.floor(midi / 12) - 1))
+        key.classList.toggle('piano__key_root', pitch === rootPitch)
+        key.classList.toggle('piano__key_tone', isMain && pitch !== rootPitch)
+        key.classList.toggle('piano__key_key', !isMain && contextPitches.includes(pitch))
     })
 }
