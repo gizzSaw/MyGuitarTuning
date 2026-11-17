@@ -128,9 +128,12 @@
     font-weight: 700;
 }
 
-/* Подсветка тональности. Классы ставит highlightKey() из neck.js.
-   Красная заливка с кольцом — тоника, золотая — остальные ноты тональности, серые — не из тональности. */
-.note.note_scale {
+/* Подсветка. Классы ставит highlightNeck() из neck.js:
+   note_root — основной тон аккорда или тоника (красная заливка с кольцом),
+   note_tone — нота аккорда или тональности (золотая заливка),
+   note_key  — нота тональности, не входящая в выбранный аккорд (золотой контур),
+   note_out  — остальные (серые). */
+.note.note_tone {
     background-color: var(--accent);
     border-color: var(--accent);
     color: var(--accent-ink);
@@ -141,8 +144,13 @@
     border-color: var(--root);
     color: var(--accent-ink);
     font-weight: 700;
-    /* кольцо — чтобы тонику было видно и без различения красного и жёлтого */
+    /* кольцо — чтобы основной тон было видно и без различения красного и жёлтого */
     box-shadow: 0 0 0 2px var(--text);
+}
+
+.note.note_key {
+    border: 2px solid var(--accent);
+    color: var(--accent);
 }
 
 .note.note_out {
@@ -151,16 +159,18 @@
 }
 
 /* на ладу 0 кружков нет — те же цвета у текста */
-.fret_0 .note.note_scale,
+.fret_0 .note.note_tone,
 .fret_0 .note.note_root,
+.fret_0 .note.note_key,
 .fret_0 .note.note_out {
     background-color: transparent;
     border-color: transparent;
     box-shadow: none;
 }
 
-.fret_0 .note.note_scale { color: var(--accent); }
+.fret_0 .note.note_tone { color: var(--accent); }
 .fret_0 .note.note_root { color: var(--root); }
+.fret_0 .note.note_key { color: var(--text); }
 
 @media (max-width: 760px) {
     .guitar-neck__inner {

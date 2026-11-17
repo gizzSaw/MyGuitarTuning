@@ -11,9 +11,12 @@
     <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/neck.css">
-    <!-- neck.js раньше main.js: main.js при запуске вызывает highlightKey() из neck.js -->
+    <!-- порядок важен: theory.js → neck.js → main.js (main.js при запуске вызывает highlightNeck() из neck.js) -->
+    <script defer src="js/theory.js"></script>
     <script defer src="js/neck.js"></script>
     <script defer src="js/main.js"></script>
+    <!-- звук струн; от порядка не зависит, NOTES использует только при клике -->
+    <script defer src="js/sound.js"></script>
 </head>
 
 <body>
@@ -28,21 +31,33 @@
 
     <main class="main container">
         <section class="card tuning" aria-labelledby="tuningTitle">
-            <h2 class="card__title" id="tuningTitle">Tuning</h2>
+            <div class="card__head">
+                <h2 class="card__title" id="tuningTitle">Tuning</h2>
+                <div class="sound">
+                    <button class="sound__btn sound__all" type="button">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"/></svg>
+                        Play all
+                    </button>
+                    <button class="sound__btn sound__repeat" type="button" aria-pressed="false">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 2l3 3-3 3M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3M20 13v2a4 4 0 0 1-4 4H4"/></svg>
+                        Repeat
+                    </button>
+                </div>
+            </div>
             <div class="app__inner">
-                <ul class="app__notes">
-                    <li class="app__notes-item app__notes-item_string4" data-string="4">D</li>
-                    <li class="app__notes-item app__notes-item_string5" data-string="5">A</li>
-                    <li class="app__notes-item app__notes-item_string6" data-string="6">E</li>
-                </ul>
+                <div class="app__notes" role="group" aria-label="Strings — tap to hear">
+                    <button class="app__notes-item app__notes-item_string4" type="button" data-string="4">D</button>
+                    <button class="app__notes-item app__notes-item_string5" type="button" data-string="5">A</button>
+                    <button class="app__notes-item app__notes-item_string6" type="button" data-string="6">E</button>
+                </div>
 
                 <img class="app__img" src="img/img.JPG" alt="Изображение головки грифа гитары">
 
-                <ul class="app__notes">
-                    <li class="app__notes-item app__notes-item_string3" data-string="3">G</li>
-                    <li class="app__notes-item app__notes-item_string2" data-string="2">B</li>
-                    <li class="app__notes-item app__notes-item_string1" data-string="1">E</li>
-                </ul>
+                <div class="app__notes" role="group" aria-label="Strings — tap to hear">
+                    <button class="app__notes-item app__notes-item_string3" type="button" data-string="3">G</button>
+                    <button class="app__notes-item app__notes-item_string2" type="button" data-string="2">B</button>
+                    <button class="app__notes-item app__notes-item_string1" type="button" data-string="1">E</button>
+                </div>
             </div>
 
             <div class="control">
@@ -66,13 +81,15 @@
                 <button class="segmented__btn" data-drop="false" aria-pressed="true">Standard</button>
                 <button class="segmented__btn" data-drop="true" aria-pressed="false">Drop</button>
             </div>
+
+            <p class="sound__status" aria-live="polite">Tap a string to hear it</p>
         </section>
 
         <section class="card key" aria-labelledby="keyTitle">
             <h2 class="card__title" id="keyTitle">Key</h2>
             <div class="key__body">
                 <div class="key__inner">
-                    <select class="key__select" id="keyRoot" aria-label="Key root note">
+                    <select class="select" id="keyRoot" aria-label="Key root note">
                         <option value="">Off</option>
                             <option>C</option>
                             <option>C#</option>
@@ -94,18 +111,54 @@
                     </div>
                 </div>
                 <div class="key__notes" aria-live="polite">
-                    <span class="key__hint">Choose a key to highlight it on the neck</span>
+                    <span class="hint">Choose a key to highlight it on the neck</span>
                 </div>
-                <ul class="key__legend">
-                    <li class="key__legend-item key__legend-item_root">Root</li>
-                    <li class="key__legend-item key__legend-item_scale">In key</li>
-                    <li class="key__legend-item key__legend-item_out">Not in key</li>
-                </ul>
+            </div>
+        </section>
+
+        <section class="card chord" aria-labelledby="chordTitle">
+            <h2 class="card__title" id="chordTitle">Chord</h2>
+            <div class="chord__inner">
+                <select class="select" id="chordRoot" aria-label="Chord root note">
+                    <option value="">Off</option>
+                        <option>C</option>
+                        <option>C#</option>
+                        <option>D</option>
+                        <option>D#</option>
+                        <option>E</option>
+                        <option>F</option>
+                        <option>F#</option>
+                        <option>G</option>
+                        <option>G#</option>
+                        <option>A</option>
+                        <option>A#</option>
+                        <option>B</option>
+                </select>
+                <!-- типы аккордов добавляет neck.js из CHORDS (theory.js) -->
+                <select class="select" id="chordQuality" aria-label="Chord type"></select>
+            </div>
+            <div class="chord__notes" aria-live="polite">
+                <span class="hint">Choose a chord to show it on the neck</span>
+            </div>
+            <div class="chord__key">
+                <div class="chord__key-head">
+                    <span class="chord__key-title">Chords in key</span>
+                    <div class="segmented segmented_small chord__size" role="group" aria-label="Chord size" hidden>
+                        <button class="segmented__btn" data-size="3" aria-pressed="true">Triads</button>
+                        <button class="segmented__btn" data-size="4" aria-pressed="false">7th</button>
+                    </div>
+                </div>
+                <div class="chord__list">
+                    <span class="hint">Choose a key to see its chords</span>
+                </div>
             </div>
         </section>
 
         <section class="card guitar-neck" aria-labelledby="neckTitle">
-            <h2 class="card__title" id="neckTitle">Fretboard</h2>
+            <div class="card__head">
+                <h2 class="card__title" id="neckTitle">Fretboard</h2>
+                <ul class="legend" aria-label="Legend" hidden></ul>
+            </div>
             <div class="guitar-neck__inner">
                 <div class="fret fret_0">
                     <div class="string string1">

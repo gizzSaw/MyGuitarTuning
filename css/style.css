@@ -129,6 +129,20 @@ body {
   color: var(--text-muted);
 }
 
+/* заголовок карточки с чем-то справа (легенда над грифом) */
+.card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 14px;
+}
+
+.card__head .card__title {
+  margin-bottom: 0;
+}
+
 /* сегментный переключатель: активная кнопка — aria-pressed="true" */
 .segmented {
   display: flex;
@@ -152,6 +166,11 @@ body {
 .segmented__btn[aria-pressed="true"] {
   background-color: var(--accent);
   color: var(--accent-ink);
+}
+
+.segmented_small .segmented__btn {
+  padding: 4px 12px;
+  font-size: 13px;
 }
 
 /* карточка строя */
@@ -179,6 +198,33 @@ body {
   border-radius: var(--radius-sm);
   font-size: 22px;
   font-weight: 600;
+  /* окошко — кнопка: по клику звучит струна (sound.js) */
+  cursor: pointer;
+  transition: background-color var(--ease), border-color var(--ease), color var(--ease), box-shadow var(--ease);
+}
+
+/* струна повторяется в режиме Repeat */
+.app__notes-item_active {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(247, 194, 35, 0.25);
+}
+
+/* вспышка в момент щипка */
+.app__notes-item_plucked {
+  animation: pluck 0.7s ease-out;
+}
+
+@keyframes pluck {
+  0% {
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 0 0 rgba(247, 194, 35, 0.6);
+  }
+
+  100% {
+    box-shadow: 0 0 0 12px rgba(247, 194, 35, 0);
+  }
 }
 
 /* номер струны в углу; текст окошка перезаписывает JS, псевдоэлемент остаётся */
@@ -260,6 +306,55 @@ body {
   margin: 16px auto 0;
 }
 
+/* звук: кнопки в заголовке карточки и строка с нотой и частотой под переключателем */
+.sound {
+  display: flex;
+  gap: 6px;
+}
+
+.sound__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px 5px 10px;
+  background-color: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background-color var(--ease), color var(--ease);
+}
+
+.sound__btn svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sound__all svg {
+  fill: currentColor;
+  stroke: none;
+}
+
+.sound__btn[aria-pressed="true"] {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.sound__status {
+  min-height: 18px;
+  margin-top: 12px;
+  text-align: center;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
 /* карточка тональности */
 .key {
   display: flex;
@@ -282,8 +377,8 @@ body {
   gap: 12px;
 }
 
-/* стрелка — svg цвета --text-muted */
-.key__select {
+/* выпадающий список; стрелка — svg цвета --text-muted */
+.select {
   -webkit-appearance: none;
   appearance: none;
   padding: 8px 34px 8px 16px;
@@ -298,21 +393,13 @@ body {
   transition: background-color var(--ease);
 }
 
-.key__select option {
+.select option {
   color: var(--text);
   background-color: var(--surface);
 }
 
-.key__notes {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px;
-  min-height: 32px;
-}
-
-/* ноты гаммы — фишки тех же цветов, что и на грифе */
-.key__note {
+/* фишка ноты — тех же цветов, что и на грифе */
+.chip {
   min-width: 32px;
   height: 32px;
   padding: 0 8px;
@@ -325,49 +412,155 @@ body {
   color: var(--accent-ink);
 }
 
-.key__note_root {
+.chip_root {
   background-color: var(--root);
   box-shadow: inset 0 0 0 2px var(--text);
 }
 
-.key__hint {
+.hint {
   font-size: 14px;
   line-height: 32px;
   color: var(--text-muted);
 }
 
-.key__legend {
+.key__notes {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 6px 16px;
+  gap: 6px;
+  min-height: 32px;
+}
+
+/* карточка аккорда */
+.chord__inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* ноты аккорда: фишка, под ней ступень (R 3 5 ♭7) */
+.chord__notes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 54px;
+  margin-top: 14px;
+}
+
+.chord__tone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.chord__degree {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* аккорды выбранной тональности */
+.chord__key {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.chord__key-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 12px;
+  margin-bottom: 12px;
+}
+
+.chord__key-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.chord__list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.chord__item {
+  min-width: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 5px 8px 6px;
+  background-color: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  transition: background-color var(--ease), color var(--ease);
+}
+
+.chord__numeral {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.chord__name {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.chord__item[aria-pressed="true"] {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.chord__item[aria-pressed="true"] .chord__numeral {
+  color: inherit;
+  opacity: 0.7;
+}
+
+/* легенда над грифом; пункты рисует neck.js */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
   font-size: 13px;
   color: var(--text-muted);
 }
 
-.key__legend-item {
+.legend__item {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.key__legend-item::before {
+.legend__item::before {
   content: "";
   width: 12px;
   height: 12px;
   border-radius: 50%;
 }
 
-.key__legend-item_root::before {
+.legend__item_root::before {
   background-color: var(--root);
   box-shadow: 0 0 0 2px var(--text);
 }
 
-.key__legend-item_scale::before {
+.legend__item_tone::before {
   background-color: var(--accent);
 }
 
-.key__legend-item_out::before {
+.legend__item_key::before {
+  border: 2px solid var(--accent);
+}
+
+.legend__item_out::before {
   border: 1px solid var(--muted);
 }
 
@@ -378,19 +571,28 @@ body {
   }
 
   .control__btn:hover,
-  .key__select:hover {
+  .app__notes-item:hover,
+  .sound__btn:hover:not([aria-pressed="true"]),
+  .select:hover,
+  .chord__item:hover:not([aria-pressed="true"]) {
     background-color: var(--surface-3);
   }
 }
 
+/* широкий экран: «Tuning» слева на две строки, справа «Key» и «Chord», гриф снизу во всю ширину */
 @media (min-width: 900px) {
   .main {
     grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "tuning key"
+      "tuning chord"
+      "neck neck";
   }
 
-  .guitar-neck {
-    grid-column: 1 / -1;
-  }
+  .tuning { grid-area: tuning; }
+  .key { grid-area: key; }
+  .chord { grid-area: chord; }
+  .guitar-neck { grid-area: neck; }
 }
 
 @media (max-width: 400px) {
@@ -430,5 +632,6 @@ body {
   *::before,
   *::after {
     transition: none !important;
+    animation: none !important;
   }
 }
