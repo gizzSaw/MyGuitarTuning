@@ -4,339 +4,383 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#161618">
     <title>My Guitar Tuning</title>
-    <link rel="icon" href="img/favicon.png">
+    <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="img/favicon.png" sizes="64x64">
     <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/neck.css">
-    <script defer src="js/main.js"></script>
+    <!-- neck.js раньше main.js: main.js при запуске вызывает highlightKey() из neck.js -->
     <script defer src="js/neck.js"></script>
+    <script defer src="js/main.js"></script>
 </head>
 
 <body>
     <header class="header">
-        <div class="container">
+        <div class="container header__inner">
+            <svg class="header__logo" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2C6.9 2 3.5 3.7 3.5 7.3c0 4.8 5.1 12 7.2 14.1a1.8 1.8 0 0 0 2.6 0c2.1-2.1 7.2-9.3 7.2-14.1C20.5 3.7 17.1 2 12 2z" fill="currentColor"/>
+            </svg>
             <h1 class="header__title">My Guitar Tuning</h1>
         </div>
     </header>
-    <main class="main">
-        <section class="app">
-            <div class="container">
-                <div class="app__inner">
-                    <ul class="app__notes">
-                        <li class="app__notes-item app__notes-item_string4">D</li>
-                        <li class="app__notes-item app__notes-item_string5">A</li>
-                        <li class="app__notes-item app__notes-item_string6">E</li>
-                    </ul>
 
-                    <img class="app__img" src="img/img.JPG" alt="Изображение головки грифа гитары">
+    <main class="main container">
+        <section class="card tuning" aria-labelledby="tuningTitle">
+            <h2 class="card__title" id="tuningTitle">Tuning</h2>
+            <div class="app__inner">
+                <ul class="app__notes">
+                    <li class="app__notes-item app__notes-item_string4" data-string="4">D</li>
+                    <li class="app__notes-item app__notes-item_string5" data-string="5">A</li>
+                    <li class="app__notes-item app__notes-item_string6" data-string="6">E</li>
+                </ul>
 
-                    <ul class="app__notes">
-                        <li class="app__notes-item app__notes-item_string3">G</li>
-                        <li class="app__notes-item app__notes-item_string2">B</li>
-                        <li class="app__notes-item app__notes-item_string1">E</li>
-                    </ul>
+                <img class="app__img" src="img/img.JPG" alt="Изображение головки грифа гитары">
 
-                </div>
-
+                <ul class="app__notes">
+                    <li class="app__notes-item app__notes-item_string3" data-string="3">G</li>
+                    <li class="app__notes-item app__notes-item_string2" data-string="2">B</li>
+                    <li class="app__notes-item app__notes-item_string1" data-string="1">E</li>
+                </ul>
             </div>
+
             <div class="control">
-                <div class="container">
-                    <div class="control__inner">
-                        <button class="control__btn control__btn_prev">
-                            -
-                        </button>
-                        <div class="control__title">
-                            <span id="currentTuning">E</span>
-                            <button class="dropBtn">Standard</button> tuning: 
-                            <br>
-                            <span class="control__notes">E A D G B E</span>
-                        </div>
-                        <button class="control__btn control__btn_next">
-                            +
-                        </button>
+                <button class="control__btn control__btn_prev" aria-label="Tune down a semitone">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg>
+                </button>
+                <div class="control__title">
+                    <div class="control__name">
+                        <span class="control__drop" hidden>Drop</span>
+                        <span class="control__root" id="currentTuning">E</span>
+                        <span class="control__std">Standard</span>
+                    </div>
+                    <span class="control__notes">E A D G B E</span>
+                </div>
+                <button class="control__btn control__btn_next" aria-label="Tune up a semitone">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                </button>
+            </div>
+
+            <div class="segmented tuning-type" role="group" aria-label="Tuning type">
+                <button class="segmented__btn" data-drop="false" aria-pressed="true">Standard</button>
+                <button class="segmented__btn" data-drop="true" aria-pressed="false">Drop</button>
+            </div>
+        </section>
+
+        <section class="card key" aria-labelledby="keyTitle">
+            <h2 class="card__title" id="keyTitle">Key</h2>
+            <div class="key__body">
+                <div class="key__inner">
+                    <select class="key__select" id="keyRoot" aria-label="Key root note">
+                        <option value="">Off</option>
+                            <option>C</option>
+                            <option>C#</option>
+                            <option>D</option>
+                            <option>D#</option>
+                            <option>E</option>
+                            <option>F</option>
+                            <option>F#</option>
+                            <option>G</option>
+                            <option>G#</option>
+                            <option>A</option>
+                            <option>A#</option>
+                            <option>B</option>
+                    </select>
+                    <div class="segmented key__types" role="group" aria-label="Scale">
+                        <button class="segmented__btn" data-scale="major" aria-pressed="true">Major</button>
+                        <button class="segmented__btn" data-scale="minor" aria-pressed="false">Minor</button>
+                        <button class="segmented__btn" data-scale="blues" aria-pressed="false">Blues</button>
+                    </div>
+                </div>
+                <div class="key__notes" aria-live="polite">
+                    <span class="key__hint">Choose a key to highlight it on the neck</span>
+                </div>
+                <ul class="key__legend">
+                    <li class="key__legend-item key__legend-item_root">Root</li>
+                    <li class="key__legend-item key__legend-item_scale">In key</li>
+                    <li class="key__legend-item key__legend-item_out">Not in key</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="card guitar-neck" aria-labelledby="neckTitle">
+            <h2 class="card__title" id="neckTitle">Fretboard</h2>
+            <div class="guitar-neck__inner">
+                <div class="fret fret_0">
+                    <div class="string string1">
+                        <!-- <div class="fret-number">0</div> -->
+                        <div class="note">E</div>
+                    </div>
+                    <div class="string string2">
+                        <div class="note">B</div>
+                    </div>
+                    <div class="string string3">
+                        <div class="note">G</div>
+                    </div>
+                    <div class="string string4">
+                        <div class="note">D</div>
+                    </div>
+                    <div class="string string5">
+                        <div class="note">A</div>
+                    </div>
+                    <div class="string string6">
+                        <div class="note">E</div>
+                    </div>
+                </div>
+                <div class="fret fret_1">
+                    <div class="string string1">
+                        <div class="fret-number">1</div>
+                        <div class="note">F</div>
+                    </div>
+                    <div class="string string2">
+                        <div class="note">C</div>
+                    </div>
+                    <div class="string string3">
+                        <div class="note">G#</div>
+                    </div>
+                    <div class="string string4">
+                        <div class="note">D#</div>
+                    </div>
+                    <div class="string string5">
+                        <div class="note">A#</div>
+                    </div>
+                    <div class="string string6">
+                        <div class="note">F</div>
+                    </div>
+                </div>
+                <div class="fret fret_2">
+                    <div class="string string1">
+                        <div class="fret-number">2</div>
+                        <div class="note">F#</div>
+                    </div>
+                    <div class="string string2">
+                        <div class="note">C#</div>
+                    </div>
+                    <div class="string string3">
+                        <div class="note">A</div>
+                    </div>
+                    <div class="string string4">
+                        <div class="note">E</div>
+                    </div>
+                    <div class="string string5">
+                        <div class="note">B</div>
+                    </div>
+                    <div class="string string6">
+                        <div class="note">F#</div>
+                    </div>
+                </div>
+                <div class="fret fret_3">
+                    <div class="string string1">
+                        <div class="fret-number">3</div>
+                        <div class="note">G</div>
+                    </div>
+                    <div class="string string2">
+                        <div class="note">D</div>
+                    </div>
+                    <div class="string string3">
+                        <div class="note">A#</div>
+                    </div>
+                    <div class="string string4">
+                        <div class="note">F</div>
+                    </div>
+                    <div class="string string5">
+                        <div class="note">C</div>
+                    </div>
+                    <div class="string string6">
+                        <div class="note">G</div>
+                    </div>
+                </div>
+                <div class="fret fret_4">
+                    <div class="string string1">
+                        <div class="fret-number">4</div>
+                        <div class="note">G#</div>
+                    </div>
+                    <div class="string string2">
+                        <div class="note">D#</div>
+                    </div>
+                    <div class="string string3">
+                        <div class="note">B</div>
+                    </div>
+                    <div class="string string4">
+                        <div class="note">F#</div>
+                    </div>
+                    <div class="string string5">
+                        <div class="note">C#</div>
+                    </div>
+                    <div class="string string6">
+                        <div class="note">G#</div>
+                    </div>
+                </div>
+                <div class="fret fret_5">
+                    <div class="string string1">
+                        <div class="fret-number">5</div>
+                        <div class="note">A</div>
+                    </div>
+                    <div class="string string2">
+                        <div class="note">E</div>
+                    </div>
+                    <div class="string string3">
+                        <div class="note">C</div>
+                    </div>
+                    <div class="string string4">
+                        <div class="note">G</div>
+                    </div>
+                    <div class="string string5">
+                        <div class="note">D</div>
+                    </div>
+                    <div class="string string6">
+                        <div class="note">A</div>
+                    </div>
+                </div>
+                <div class="fret fret_6">
+                    <div class="string string1">
+                        <div class="fret-number">6</div>
+                        <div class="note">A#</div>
+                    </div>
+                    <div class="string string2">
+                        <div class="note">F</div>
+                    </div>
+                    <div class="string string3">
+                        <div class="note">C#</div>
+                    </div>
+                    <div class="string string4">
+                        <div class="note">G#</div>
+                    </div>
+                    <div class="string string5">
+                        <div class="note">D#</div>
+                    </div>
+                    <div class="string string6">
+                        <div class="note">A#</div>
+                    </div>
+                </div>
+                <div class="fret fret_7">
+                    <div class="string string1">
+                        <div class="fret-number">7</div>
+                        <div class="note">B</div>
+                    </div>
+                    <div class="string string2">
+                        <div class="note">F#</div>
+                    </div>
+                    <div class="string string3">
+                        <div class="note">D</div>
+                    </div>
+                    <div class="string string4">
+                        <div class="note">A</div>
+                    </div>
+                    <div class="string string5">
+                        <div class="note">E</div>
+                    </div>
+                    <div class="string string6">
+                        <div class="note">B</div>
+                    </div>
+                </div>
+                <div class="fret fret_8">
+                    <div class="string string1">
+                        <div class="fret-number">8</div>
+                        <div class="note">C</div>
+                    </div>
+                    <div class="string string2">
+                        <div class="note">G</div>
+                    </div>
+                    <div class="string string3">
+                        <div class="note">D#</div>
+                    </div>
+                    <div class="string string4">
+                        <div class="note">A#</div>
+                    </div>
+                    <div class="string string5">
+                        <div class="note">F</div>
+                    </div>
+                    <div class="string string6">
+                        <div class="note">C</div>
+                    </div>
+                </div>
+                <div class="fret fret_9">
+                    <div class="string string1">
+                        <div class="fret-number">9</div>
+                        <div class="note">C#</div>
+                    </div>
+                    <div class="string string2">
+                        <div class="note">G#</div>
+                    </div>
+                    <div class="string string3">
+                        <div class="note">E</div>
+                    </div>
+                    <div class="string string4">
+                        <div class="note">B</div>
+                    </div>
+                    <div class="string string5">
+                        <div class="note">F#</div>
+                    </div>
+                    <div class="string string6">
+                        <div class="note">C#</div>
+                    </div>
+                </div>
+                <div class="fret fret_10">
+                    <div class="string string1">
+                        <div class="fret-number">10</div>
+                        <div class="note">D</div>
+                    </div>
+                    <div class="string string2">
+                        <div class="note">A</div>
+                    </div>
+                    <div class="string string3">
+                        <div class="note">F</div>
+                    </div>
+                    <div class="string string4">
+                        <div class="note">C</div>
+                    </div>
+                    <div class="string string5">
+                        <div class="note">G</div>
+                    </div>
+                    <div class="string string6">
+                        <div class="note">D</div>
+                    </div>
+                </div>
+                <div class="fret fret_11">
+                    <div class="string string1">
+                        <div class="fret-number">11</div>
+                        <div class="note">D#</div>
+                    </div>
+                    <div class="string string2">
+                        <div class="note">A#</div>
+                    </div>
+                    <div class="string string3">
+                        <div class="note">F#</div>
+                    </div>
+                    <div class="string string4">
+                        <div class="note">C#</div>
+                    </div>
+                    <div class="string string5">
+                        <div class="note">G#</div>
+                    </div>
+                    <div class="string string6">
+                        <div class="note">D#</div>
+                    </div>
+                </div>
+                <div class="fret fret_12">
+                    <div class="string string1">
+                        <div class="fret-number">12</div>
+                        <div class="note">E</div>
+                    </div>
+                    <div class="string string2">
+                        <div class="note">B</div>
+                    </div>
+                    <div class="string string3">
+                        <div class="note">G</div>
+                    </div>
+                    <div class="string string4">
+                        <div class="note">D</div>
+                    </div>
+                    <div class="string string5">
+                        <div class="note">A</div>
+                    </div>
+                    <div class="string string6">
+                        <div class="note">E</div>
                     </div>
                 </div>
             </div>
-        </section>
-        <section class="guitar-neck">
-            <div class="container">
-                <div class="guitar-neck__inner">
-            <div class="fret fret_0">
-                <div class="string string1">
-                    <!-- <div class="fret-number">0</div> -->
-                    <div class="note">E</div>
-                </div>
-                <div class="string string2">
-                    <div class="note">B</div>
-                </div>
-                <div class="string string3">
-                    <div class="note">G</div>
-                </div>
-                <div class="string string4">
-                    <div class="note">D</div>
-                </div>
-                <div class="string string5">
-                    <div class="note">A</div>
-                </div>
-                <div class="string string6">
-                    <div class="note">E</div>
-                </div>
-            </div>
-            <div class="fret fret_1">
-                <div class="string string1">
-                    <div class="fret-number">1</div>
-                    <div class="note">F</div>
-                </div>
-                <div class="string string2">
-                    <div class="note">C</div>
-                </div>
-                <div class="string string3">
-                    <div class="note">G#</div>
-                </div>
-                <div class="string string4">
-                    <div class="note">D#</div>
-                </div>
-                <div class="string string5">
-                    <div class="note">A#</div>
-                </div>
-                <div class="string string6">
-                    <div class="note">F</div>
-                </div>
-            </div>
-            <div class="fret fret_2">
-                <div class="string string1">
-                    <div class="fret-number">2</div>
-                    <div class="note">F#</div>
-                </div>
-                <div class="string string2">
-                    <div class="note">C#</div>
-                </div>
-                <div class="string string3">
-                    <div class="note">A</div>
-                </div>
-                <div class="string string4">
-                    <div class="note">E</div>
-                </div>
-                <div class="string string5">
-                    <div class="note">B</div>
-                </div>
-                <div class="string string6">
-                    <div class="note">F#</div>
-                </div>
-            </div>
-            <div class="fret fret_3">
-                <div class="string string1">
-                    <div class="fret-number">3</div>
-                    <div class="note">G</div>
-                </div>
-                <div class="string string2">
-                    <div class="note">D</div>
-                </div>
-                <div class="string string3">
-                    <div class="note">A#</div>
-                </div>
-                <div class="string string4">
-                    <div class="note">F</div>
-                </div>
-                <div class="string string5">
-                    <div class="note">C</div>
-                </div>
-                <div class="string string6">
-                    <div class="note">G</div>
-                </div>
-            </div>
-            <div class="fret fret_4">
-                <div class="string string1">
-                    <div class="fret-number">4</div>
-                    <div class="note">G#</div>
-                </div>
-                <div class="string string2">
-                    <div class="note">D#</div>
-                </div>
-                <div class="string string3">
-                    <div class="note">B</div>
-                </div>
-                <div class="string string4">
-                    <div class="note">F#</div>
-                </div>
-                <div class="string string5">
-                    <div class="note">C#</div>
-                </div>
-                <div class="string string6">
-                    <div class="note">G#</div>
-                </div>
-            </div>
-            <div class="fret fret_5">
-                <div class="string string1">
-                    <div class="fret-number">5</div>
-                    <div class="note">A</div>
-                </div>
-                <div class="string string2">
-                    <div class="note">E</div>
-                </div>
-                <div class="string string3">
-                    <div class="note">C</div>
-                </div>
-                <div class="string string4">
-                    <div class="note">G</div>
-                </div>
-                <div class="string string5">
-                    <div class="note">D</div>
-                </div>
-                <div class="string string6">
-                    <div class="note">A</div>
-                </div>
-            </div>
-            <div class="fret fret_6">
-                <div class="string string1">
-                    <div class="fret-number">6</div>
-                    <div class="note">A#</div>
-                </div>
-                <div class="string string2">
-                    <div class="note">F</div>
-                </div>
-                <div class="string string3">
-                    <div class="note">C#</div>
-                </div>
-                <div class="string string4">
-                    <div class="note">G#</div>
-                </div>
-                <div class="string string5">
-                    <div class="note">D#</div>
-                </div>
-                <div class="string string6">
-                    <div class="note">A#</div>
-                </div>
-            </div>
-            <div class="fret fret_7">
-                <div class="string string1">
-                    <div class="fret-number">7</div>
-                    <div class="note">B</div>
-                </div>
-                <div class="string string2">
-                    <div class="note">F#</div>
-                </div>
-                <div class="string string3">
-                    <div class="note">D</div>
-                </div>
-                <div class="string string4">
-                    <div class="note">A</div>
-                </div>
-                <div class="string string5">
-                    <div class="note">E</div>
-                </div>
-                <div class="string string6">
-                    <div class="note">B</div>
-                </div>
-            </div>
-            <div class="fret fret_8">
-                <div class="string string1">
-                    <div class="fret-number">8</div>
-                    <div class="note">C</div>
-                </div>
-                <div class="string string2">
-                    <div class="note">G</div>
-                </div>
-                <div class="string string3">
-                    <div class="note">D#</div>
-                </div>
-                <div class="string string4">
-                    <div class="note">A#</div>
-                </div>
-                <div class="string string5">
-                    <div class="note">F</div>
-                </div>
-                <div class="string string6">
-                    <div class="note">C</div>
-                </div>
-            </div>
-            <div class="fret fret_9">
-                <div class="string string1">
-                    <div class="fret-number">9</div>
-                    <div class="note">C#</div>
-                </div>
-                <div class="string string2">
-                    <div class="note">G#</div>
-                </div>
-                <div class="string string3">
-                    <div class="note">E</div>
-                </div>
-                <div class="string string4">
-                    <div class="note">B</div>
-                </div>
-                <div class="string string5">
-                    <div class="note">F#</div>
-                </div>
-                <div class="string string6">
-                    <div class="note">C#</div>
-                </div>
-            </div>
-            <div class="fret fret_10">
-                <div class="string string1">
-                    <div class="fret-number">10</div>
-                    <div class="note">D</div>
-                </div>
-                <div class="string string2">
-                    <div class="note">A</div>
-                </div>
-                <div class="string string3">
-                    <div class="note">F</div>
-                </div>
-                <div class="string string4">
-                    <div class="note">C</div>
-                </div>
-                <div class="string string5">
-                    <div class="note">G</div>
-                </div>
-                <div class="string string6">
-                    <div class="note">D</div>
-                </div>
-            </div>
-            <div class="fret fret_11">
-                <div class="string string1">
-                    <div class="fret-number">11</div>
-                    <div class="note">D#</div>
-                </div>
-                <div class="string string2">
-                    <div class="note">A#</div>
-                </div>
-                <div class="string string3">
-                    <div class="note">F#</div>
-                </div>
-                <div class="string string4">
-                    <div class="note">C#</div>
-                </div>
-                <div class="string string5">
-                    <div class="note">G#</div>
-                </div>
-                <div class="string string6">
-                    <div class="note">D#</div>
-                </div>
-            </div>
-            <div class="fret fret_12">
-                <div class="string string1">
-                    <div class="fret-number">12</div>
-                    <div class="note">E</div>
-                </div>
-                <div class="string string2">
-                    <div class="note">B</div>
-                </div>
-                <div class="string string3">
-                    <div class="note">G</div>
-                </div>
-                <div class="string string4">
-                    <div class="note">D</div>
-                </div>
-                <div class="string string5">
-                    <div class="note">A</div>
-                </div>
-                <div class="string string6">
-                    <div class="note">E</div>
-                </div>
-            </div>
-        </div>
-        </div>
         </section>
     </main>
 </body>

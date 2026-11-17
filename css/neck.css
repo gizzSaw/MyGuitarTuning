@@ -1,112 +1,235 @@
+/* Гриф. Две раскладки на одной разметке:
+   - горизонтальная (по умолчанию): лады — колонки, струны — строки, 1-я (тонкая E) сверху;
+   - вертикальная (≤ 560px): лады — строки сверху вниз, струны — колонки, 6-я слева, как в аккордовых схемах.
+   Размеры — переменные на .guitar-neck__inner, media-запросы меняют только их и направление. */
 .guitar-neck__inner {
+    --board: #33241d;            /* палисандровая накладка */
+    --fret-wire: #a3a3ab;
+    --nut: #e9e3d3;              /* костяной порожек */
+    --string: rgba(236, 230, 216, 0.55);
+    --inlay: rgba(255, 255, 255, 0.22);
+    --open-size: 40px;           /* колонка открытых струн (лад 0) */
+    --row: 40px;                 /* расстояние между струнами */
+    --note: 30px;
+    --note-font: 13px;
+
     display: flex;
-    color: var(--clr-2);
-    margin-top: 56px;
-    justify-content: center;
-    margin-bottom: 100px;
-
+    padding-top: 24px;           /* место под номера ладов */
 }
 
-.fret-number {
-    text-align: center;
-    color: var(--clr-1);
+.fret {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    background-color: var(--board);
+    border-right: 2px solid var(--fret-wire);
 }
 
-.fret_3, .fret_5, .fret_7, .fret_9, .fret_12{
-    background-color: var(--clr-neck);
+.fret_0 {
+    flex: 0 0 var(--open-size);
+    background-color: transparent;
+    border-right: 6px solid var(--nut);
 }
 
 .string {
     position: relative;
-    border: 2px solid var(--clr-1);
-    height: 43px;
-    width: 50px;
-    margin: -2px;
-    margin-left: 0px;
+    height: var(--row);
 }
 
-.string1 {
-    background-color: var(--bg);
-    border: 1px solid var(--bg);
-}
-
-/* нота по центру лада по горизонтали и на линии струны (нижней границе клетки) по вертикали */
-.note {
+/* струна — линия через центр клетки, толщина растёт от 1-й к 6-й */
+.string::before {
+    content: "";
     position: absolute;
-    bottom: 0px;
-    left: 50%;
-    transform: translate(-50%, 50%);
-    width: 30px;
-    height: 30px;
-    background-color: var(--bg);
-    border: 1px solid var(--clr-1);
-    border-radius: 50%;
-    text-align: center;
-    line-height: 1.8;
-    z-index: 1;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: var(--gauge);
+    transform: translateY(-50%);
+    background-color: var(--string);
 }
 
-.fret_0 .string {
-    border: none;
-}
+.string1 { --gauge: 1px; }
+.string2 { --gauge: 1.5px; }
+.string3 { --gauge: 2px; }
+.string4 { --gauge: 2px; }
+.string5 { --gauge: 2.5px; }
+.string6 { --gauge: 3px; }
 
-.fret_0 .note {
-    border: none;
-    font-weight: bold;
-    font-size: 20px;
-    bottom: 7px;
-}
-
-.hidden {
+.fret_0 .string::before {
     display: none;
 }
 
-@media (max-width: 820px) {
-    .string {
-        height: 39px;
-        width: 40px;
-    }
-    .note {
-        width: 23px;
-        height: 23px;
-        font-size: 13px;
-    }
-    .fret_0 .note {
-        background-color: transparent;
+/* перламутровые точки: одна на 3, 5, 7, 9 ладу, две на 12-м */
+.fret_3::after,
+.fret_5::after,
+.fret_7::after,
+.fret_9::after,
+.fret_12::before,
+.fret_12::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;  /* помещается в зазор между кружками нот на любой ширине */
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--inlay);
+    transform: translate(-50%, -50%);
+}
+
+.fret_12::before { top: 33.333%; }
+.fret_12::after { top: 66.667%; }
+
+/* номер лада стоит в клетке 1-й струны и выносится за край грифа */
+.fret-number {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    padding-bottom: 6px;
+    text-align: center;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+}
+
+.fret_3 .fret-number,
+.fret_5 .fret-number,
+.fret_7 .fret-number,
+.fret_9 .fret-number,
+.fret_12 .fret-number {
+    color: var(--text);
+}
+
+.note {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 1;
+    width: var(--note);
+    height: var(--note);
+    display: grid;
+    place-items: center;
+    transform: translate(-50%, -50%);
+    background-color: #1c1c20;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 50%;
+    font-size: var(--note-font);
+    font-weight: 600;
+    line-height: 1;
+    transition: background-color var(--ease), border-color var(--ease), color var(--ease), box-shadow var(--ease);
+}
+
+/* открытые струны — подписи без кружка */
+.fret_0 .note {
+    background-color: transparent;
+    border-color: transparent;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+/* Подсветка тональности. Классы ставит highlightKey() из neck.js.
+   Красная заливка с кольцом — тоника, золотая — остальные ноты тональности, серые — не из тональности. */
+.note.note_scale {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+}
+
+.note.note_root {
+    background-color: var(--root);
+    border-color: var(--root);
+    color: var(--accent-ink);
+    font-weight: 700;
+    /* кольцо — чтобы тонику было видно и без различения красного и жёлтого */
+    box-shadow: 0 0 0 2px var(--text);
+}
+
+.note.note_out {
+    border-color: rgba(255, 255, 255, 0.06);
+    color: var(--muted);
+}
+
+/* на ладу 0 кружков нет — те же цвета у текста */
+.fret_0 .note.note_scale,
+.fret_0 .note.note_root,
+.fret_0 .note.note_out {
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.fret_0 .note.note_scale { color: var(--accent); }
+.fret_0 .note.note_root { color: var(--root); }
+
+@media (max-width: 760px) {
+    .guitar-neck__inner {
+        --open-size: 34px;
+        --row: 36px;
+        --note: 26px;
+        --note-font: 12px;
     }
 }
 
+/* телефоны: гриф вертикально */
+@media (max-width: 560px) {
+    .guitar-neck__inner {
+        --open-size: 40px;       /* высота строки открытых струн */
+        --fret-size: 46px;       /* высота лада */
+        --note: 30px;
+        --note-font: 13px;
 
-@media (max-width: 610px) {
+        flex-direction: column;
+        padding-top: 0;
+        padding-right: 28px;     /* место под номера ладов справа */
+    }
+
+    .fret {
+        display: flex;
+        flex: 0 0 var(--fret-size);
+        flex-direction: row-reverse; /* в разметке струны идут 1→6, а слева должна быть 6-я */
+        border-right: none;
+        border-bottom: 2px solid var(--fret-wire);
+    }
+
+    .fret_0 {
+        flex-basis: var(--open-size);
+        border-right: none;
+        border-bottom: 6px solid var(--nut);
+    }
+
     .string {
-        height: 35px;
-        width: 30px;
-    }
-    .note {
-        width: 23px;
-        height: 23px;
-        font-size: 11px;
-    }
-    .fret_0 .note {
-        font-size: 15px;
-        bottom: 4px;
+        flex: 1 1 0;
+        height: auto;
     }
 
+    .string::before {
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        right: auto;
+        width: var(--gauge);
+        height: auto;
+        transform: translateX(-50%);
+    }
+
+    .fret-number {
+        top: 50%;
+        bottom: auto;
+        left: 100%;
+        right: auto;
+        padding: 0 0 0 10px;
+        transform: translateY(-50%);
+        text-align: left;
+    }
+
+    .fret_12::before { top: 50%; left: 33.333%; }
+    .fret_12::after { top: 50%; left: 66.667%; }
 }
 
-@media (max-width: 500px) {
-    .string {
-        height: 32px;
-        width: 25px;
-    }
-    .note {
-        width: 16px;
-        height: 16px;
-        font-size: 9px;
-    }
-    .fret_0 .note {
-        font-size: 14px;
-        bottom: 2px;
+@media (max-width: 360px) {
+    .guitar-neck__inner {
+        --note: 28px;
+        --note-font: 12px;
     }
 }
-

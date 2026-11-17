@@ -1,7 +1,9 @@
 /* Получаем кнопки управления */
 const prevBtn = document.querySelector('.control__btn_prev')
 const nextBtn = document.querySelector('.control__btn_next')
-const dropBtn = document.querySelector('.dropBtn')
+const dropBtns = document.querySelectorAll('.tuning-type .segmented__btn') // Standard | Drop
+const dropLabel = document.querySelector('.control__drop')     // «Drop» перед нотой: Drop D
+const standardLabel = document.querySelector('.control__std')  // «Standard» после ноты: E Standard
 /*Получаем окошко каждой струны*/
 const string6 = document.querySelector('.app__notes-item_string6')
 const string5 = document.querySelector('.app__notes-item_string5')
@@ -15,14 +17,12 @@ const strings = [string6,string5,string4,string3,string2,string1]
 
 // изначально строй не дропнут
 let isDropped = false
-const changeDropped = () => {
-    if(isDropped) {
-        isDropped = false
-        dropBtn.textContent = 'Standard'
-    } else {
-        isDropped = true
-        dropBtn.textContent = 'Drop'
-    }
+const setDropped = (value) => {
+    isDropped = value
+    // активная кнопка переключателя — aria-pressed="true", её подсвечивает CSS
+    dropBtns.forEach(btn => btn.setAttribute('aria-pressed', btn.dataset.drop === String(value)))
+    dropLabel.hidden = !value
+    standardLabel.hidden = value
     changeTuning()
 }
 // остаток от деления на 12 возвращает ноту в пределы октавы при любом интервале
@@ -94,6 +94,8 @@ const changeTuning = (direction) => {
     )
     //перерисовка грифа (функция объявлена ниже в этом же файле)
     changeNotesOnNeck()
+    //ноты на грифе поменялись — заново подсвечиваем тональность (функция из neck.js)
+    highlightKey()
 }
 
 
@@ -108,8 +110,10 @@ nextBtn.addEventListener('click', () => {
     changeTuning('next')
 })
 
-dropBtn.addEventListener('click', () => {
-    changeDropped()
+dropBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        setDropped(btn.dataset.drop === 'true')
+    })
 })
 
 
@@ -444,20 +448,7 @@ currentTuning.forEach((item, index) => {
 //получить ноты из хтмл первого приложения
 //от нулевого лада получить струну, и как то в неё это запихнуть 
 //тоже самое для всех струн
-//потом прикрутить расчёт тональностей,
-//в котором сначала выбрать элементы для удаления, а потом повесить им класс хидден
-
-// inners.forEach((item) => {
-//     if (item.textContent === 'F#' || 
-//         item.textContent === 'G#' ||  
-//         item.textContent === 'A#' ||  
-//         item.textContent === 'C#' ||  
-//         item.textContent === 'D#'   
-//     ) {
-//         item.classList.add('hidden')
-//     }
-//     console.log(item.textContent)
-// })
+//расчёт тональностей и их подсветка на грифе — в neck.js (highlightKey)
 
 
 changeTuning()

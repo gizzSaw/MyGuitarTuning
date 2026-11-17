@@ -1,35 +1,41 @@
-/* одно семейство с двумя начертаниями: font-weight: bold сам подхватит Helvetica-Bold.
-   local() — если Helvetica уже есть в системе (macOS/iOS), файл не скачивается */
-@font-face {
-  font-family: "Helvetica";
-  src: local("Helvetica"), url(../fonts/Helvetica.ttf) format("truetype");
-  font-style: normal;
-  font-weight: 400;
-}
-
-@font-face {
-  font-family: "Helvetica";
-  src: local("Helvetica Bold"), local("Helvetica-Bold"), url(../fonts/Helvetica-Bold.ttf) format("truetype");
-  font-style: normal;
-  font-weight: 700;
-}
-
 :root {
-  --bg: #252527;
-  --clr-1: #a2a2a3;
-  --clr-2: #e7e7ec;
-  --clr-3: #f7c223;
-  --clr-neck: rgb(44, 31, 26);
+  color-scheme: dark;
+
+  /* поверхности */
+  --page: #161618;
+  --surface: #252527; /* = фон картинки img.JPG: не менять, иначе вокруг картинки будет виден прямоугольник */
+  --surface-2: #303035;
+  --surface-3: #3b3b41;
+  --line: rgba(255, 255, 255, 0.08);
+
+  /* текст */
+  --text: #ececf1;
+  --text-muted: #9a9aa3;
+
+  /* акценты */
+  --accent: #f7c223;      /* золотой, как логотип на головке грифа */
+  --accent-ink: #1a1a1c;  /* текст на золотой/красной заливке */
+  --root: #ff6b4a;        /* тоника выбранной тональности */
+  --muted: #55555b;       /* ноты не из тональности */
+
+  --radius: 20px;
+  --radius-sm: 12px;
+  --ease: 0.18s ease;
 }
 
 html {
   box-sizing: border-box;
+  -webkit-text-size-adjust: 100%;
 }
 
 *,
 *::before,
 *::after {
   box-sizing: inherit;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 a {
@@ -47,116 +53,382 @@ img {
 
 button {
   color: inherit;
-  font-size: inherit;
+  font: inherit;
   background-color: transparent;
   border: none;
   cursor: pointer;
-  font-family: inherit;
   padding: 0;
 }
 
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--text);
+  background-color: var(--page);
+  -webkit-font-smoothing: antialiased;
+}
+
 .container {
-  max-width: 550px;
-  padding: 0 10px;
+  max-width: 960px;
+  padding: 0 16px;
   margin: 0 auto;
 }
 
-
-body {
-  font-family: "Helvetica", sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.4;
-  color: var(--clr-1);
-  background-color: var(--bg);
+/* шапка */
+.header {
+  padding: 20px 0 4px;
 }
 
-.header {
-  border-bottom: 1px solid var(--clr-2);
-  color: var(--clr-3);
-  text-align: center;
+.header__inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header__logo {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  color: var(--accent);
 }
 
 .header__title {
-  font-size: 25px;
-  margin: 15px 0px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
+/* сетка карточек: на широком экране «Tuning» и «Key» рядом, гриф во всю ширину */
+.main {
+  display: grid;
+  gap: 16px;
+  padding-top: 16px;
+  padding-bottom: 40px;
+}
+
+.card {
+  min-width: 0;
+  padding: 20px;
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.card__title {
+  margin-bottom: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* сегментный переключатель: активная кнопка — aria-pressed="true" */
+.segmented {
+  display: flex;
+  width: fit-content;
+  gap: 4px;
+  padding: 4px;
+  background-color: var(--page);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.segmented__btn {
+  padding: 7px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: background-color var(--ease), color var(--ease);
+}
+
+.segmented__btn[aria-pressed="true"] {
+  background-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* карточка строя */
 .app__inner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-top: 15px;
+  justify-content: center;
+  gap: 20px;
+}
+
+.app__notes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .app__notes-item {
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 8px;
-  border: 1px solid var(--clr-2);
-  color: var(--clr-2);
-  border-radius: 4px;
-  font-size: 25px;
+  position: relative;
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  background-color: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-size: 22px;
+  font-weight: 600;
+}
+
+/* номер струны в углу; текст окошка перезаписывает JS, псевдоэлемент остаётся */
+.app__notes-item::before {
+  content: attr(data-string);
+  position: absolute;
+  top: 4px;
+  left: 7px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.app__img {
+  display: block;
+  width: 220px;
+  min-width: 0;
+  /* гриф на картинке плавно растворяется внизу, а не обрезается */
+  -webkit-mask-image: linear-gradient(to bottom, #000 75%, transparent);
+  mask-image: linear-gradient(to bottom, #000 75%, transparent);
 }
 
 .control {
-  border-top: 1px solid var(--clr-2);
-  border-bottom: 1px solid var(--clr-2);
-}
-
-.control__inner {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-}
-
-.control__title {
-  width: 270px;
-  font-weight: bold;
-  text-align: center;
-  font-size: 20px;
-}
-
-.control__notes {
-  color: var(--clr-2);
-  font-weight: normal;
+  gap: 16px;
+  margin-top: 4px;
 }
 
 .control__btn {
-  border: 1px solid var(--clr-1);
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  background-color: var(--surface-2);
+  border: 1px solid var(--line);
   border-radius: 50%;
-  font-size: 29px;
-  width: 36px;
-  height: 36px;
-  margin: 12px;
-  color: var(--clr-3);
-  border-color: var(--clr-3);
+  transition: background-color var(--ease), transform 0.1s ease;
 }
 
-.dropBtn {
-  color: var(--clr-3);
-  border: 1px solid var(--clr-3);
-  padding: 4px 8px;
-  border-radius: 7px;
+.control__btn svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
 }
 
-@media (max-width: 500px) {
-  .app__img {
-    width: 200px;
-    /* разрешаем картинке сжиматься, если окошкам нот не хватает места */
-    min-width: 0;
+.control__btn:active {
+  transform: scale(0.94);
+}
+
+.control__title {
+  min-width: 180px;
+  text-align: center;
+}
+
+.control__name {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.control__root {
+  color: var(--accent);
+}
+
+.control__notes {
+  display: block;
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+}
+
+.tuning-type {
+  margin: 16px auto 0;
+}
+
+/* карточка тональности */
+.key {
+  display: flex;
+  flex-direction: column;
+}
+
+.key__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+}
+
+.key__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* стрелка — svg цвета --text-muted */
+.key__select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding: 8px 34px 8px 16px;
+  background: var(--surface-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%239a9aa3' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 14px center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color var(--ease);
+}
+
+.key__select option {
+  color: var(--text);
+  background-color: var(--surface);
+}
+
+.key__notes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+}
+
+/* ноты гаммы — фишки тех же цветов, что и на грифе */
+.key__note {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  display: grid;
+  place-items: center;
+  background-color: var(--accent);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-ink);
+}
+
+.key__note_root {
+  background-color: var(--root);
+  box-shadow: inset 0 0 0 2px var(--text);
+}
+
+.key__hint {
+  font-size: 14px;
+  line-height: 32px;
+  color: var(--text-muted);
+}
+
+.key__legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.key__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.key__legend-item::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.key__legend-item_root::before {
+  background-color: var(--root);
+  box-shadow: 0 0 0 2px var(--text);
+}
+
+.key__legend-item_scale::before {
+  background-color: var(--accent);
+}
+
+.key__legend-item_out::before {
+  border: 1px solid var(--muted);
+}
+
+/* наведение — только там, где есть мышь */
+@media (hover: hover) {
+  .segmented__btn:hover:not([aria-pressed="true"]) {
+    color: var(--text);
+  }
+
+  .control__btn:hover,
+  .key__select:hover {
+    background-color: var(--surface-3);
   }
 }
 
-@media (max-width: 360px) {
+@media (min-width: 900px) {
+  .main {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .guitar-neck {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 400px) {
+  .card {
+    padding: 16px;
+  }
+
+  .app__inner {
+    gap: 12px;
+  }
+
   .app__notes-item {
     width: 48px;
     height: 48px;
-    margin: 6px;
+    font-size: 20px;
+  }
+
+  .app__img {
+    width: 170px;
+  }
+
+  .control {
+    gap: 8px;
+  }
+
+  .control__title {
+    min-width: 0;
+  }
+
+  .control__name {
     font-size: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
   }
 }
