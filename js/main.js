@@ -8,6 +8,11 @@ const standardLabel = document.querySelector('.control__std')  // «Standard» �
   (getStringBoxes — от 1-й струны, а нам нужно от самой толстой). Массив всех нот NOTES — в theory.js*/
 const getStringsThickToThin = () => getStringBoxes().reverse()
 
+/* Строй общий для гитары и баса, как в группе: сдвиг от стандартного в полутонах и дроп.
+   Гитара D Standard -> бас D Standard (5-струнный — A Standard), гитара Drop D -> бас Drop D (5-струнный — Drop A).
+   Открытые струны каждого инструмента считает getOpenMidis (instrument.js); окошки на головке и название строя
+   показывают инструмент, выбранный в карточке Tuning */
+let tuningShift = 0 // −6…+5: E Standard — 0, D Standard — −2
 // изначально строй не дропнут
 let isDropped = false
 const setDropped = (value) => {
@@ -18,56 +23,41 @@ const setDropped = (value) => {
     standardLabel.hidden = value
     changeTuning()
 }
-// остаток от деления на 12 возвращает ноту в пределы октавы при любом интервале
-const returnNoteToOctave = (interval, currentTuningIndex) => {
-    return NOTES[(currentTuningIndex + interval) % NOTES.length]
-}
-//отделить корректировку индекса, от записи значения в хтмл струну
-const writeCorrectNote = (intervals, currentTuningIndex) => {
-    const strings = getStringsThickToThin()
-    for(let i = 0; i < intervals.length; i++) {
-        strings[i].textContent = returnNoteToOctave(intervals[i], currentTuningIndex)
-    }
-}
-// интервалы для всех струн от самой толстой, если строй не дропнут: берём из стандартного строя инструмента
-// (instrument.js): гитара 0 5 10 15 19 24, бас 0 5 10 15 (20). Где больше 12 — та же нота, октава = 12 полутонов
-const setIntervals = () => {
-    // если строй дроп, то самая толстая струна опущена на тон,
-    // поэтому интервалы от неё до остальных струн больше на 2 полутона
-    return getTuningSteps().map((step, i) => (step + (isDropped && i > 0 ? 2 : 0)) % 12)
+//отделить расчёт строя (getOpenMidis), от записи значения в хтмл струну
+const writeCorrectNote = openMidis => {
+    getStringBoxes().forEach(box => {
+        box.textContent = NOTES[openMidis[box.dataset.string - 1] % NOTES.length]
+    })
 }
 
 const changeTuning = (direction) => {
-    let currentTuning = document.querySelector('#currentTuning')
-    let currentTuningIndex = NOTES.indexOf(currentTuning.textContent)
-
     if (direction === 'next') {
-        currentTuningIndex++
+        tuningShift++
     } else if (direction === 'prev') {
-        currentTuningIndex--
-    } 
-    
-    //при выходе за пределы массива нот перебрасываем  returnToNOTESArray useEndlesHarmony
-    if(currentTuningIndex < 0) { 
-        currentTuningIndex = NOTES.length - 1 //в конец массива
-    } else if (currentTuningIndex > NOTES.length - 1) {
-        currentTuningIndex = 0 //в начало
+        tuningShift--
     }
+
+    //при выходе за пределы перебрасываем: сдвиг держим в −6…+5, через 12 полутонов — та же нота, октава = 12 полутонов
+    if(tuningShift < -6) {
+        tuningShift += 12
+    } else if (tuningShift > 5) {
+        tuningShift -= 12
+    }
+    // тоника строя — самая толстая струна выбранного инструмента
+    const openMidis = getOpenMidis(getSelectedKey())
+    const currentTuningIndex = openMidis[openMidis.length - 1] % NOTES.length
     console.log(currentTuningIndex) // этот вывод пока очень важен, не удаляй
-    
-    currentTuning.textContent = NOTES[currentTuningIndex]
 
-    //задаём интервалы для standard/drop (самая толстая струна — тоника строя)
-    const intervals = setIntervals()
+    document.querySelector('#currentTuning').textContent = NOTES[currentTuningIndex]
 
-    writeCorrectNote(intervals, currentTuningIndex)
-    
-    /* изменение нот в строчке снизу — от самой толстой струны */ 
+    writeCorrectNote(openMidis)
+
+    /* изменение нот в строчке снизу — от самой толстой струны */
     document.querySelector('.control__notes').textContent =
         getStringsThickToThin().map(box => box.textContent).join(' ')
-    //перерисовка грифа (функция объявлена ниже в этом же файле)
+    //перерисовка грифов (функция объявлена ниже в этом же файле)
     changeNotesOnNeck()
-    //ноты на грифе поменялись — заново подсвечиваем тональность и аккорд (функция из neck.js)
+    //ноты на грифах поменялись — заново подсвечиваем тональность и аккорд (функция из neck.js)
     highlightNeck()
 }
 
@@ -90,17 +80,19 @@ dropBtns.forEach(btn => {
 })
 
 
-/* Перерисовка грифа: нота на струне и ладу = открытая нота струны (окошко на головке) + номер лада.
-   Гриф строит fretboard.js, у каждой ноты data-string и data-fret, поэтому число струн и ладов любое.
+/* Перерисовка грифов (гитары и баса): нота на струне и ладу = открытая струна инструмента этого грифа + лад.
+   Грифы строит fretboard.js, у каждой ноты data-string и data-fret, инструмент — data-instrument контейнера.
    Пишем названия из NOTES (диезы); highlightNeck() потом переименует их по тональности (B♭ вместо A♯). */
 const changeNotesOnNeck = () => {
-    document.querySelectorAll('.guitar-neck .note').forEach(note => {
-        const openNote = document.querySelector(`.app__notes-item_string${note.dataset.string}`).textContent
-        note.textContent = NOTES[(NOTES.indexOf(openNote) + Number(note.dataset.fret)) % NOTES.length]
+    document.querySelectorAll('.guitar-neck__inner').forEach(board => {
+        const openMidis = getOpenMidis(fretboardKey(board))
+        board.querySelectorAll('.note').forEach(note => {
+            note.textContent = NOTES[(openMidis[note.dataset.string - 1] + Number(note.dataset.fret)) % NOTES.length]
+        })
     })
 }
 
-//теория (гаммы, аккорды) — в theory.js, подсветка тональности и аккорда на грифе — в neck.js (highlightNeck)
+//теория (гаммы, аккорды) — в theory.js, подсветка тональности и аккорда на грифах — в neck.js (highlightNeck)
 
 
 changeTuning()

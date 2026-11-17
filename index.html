@@ -13,8 +13,8 @@
     <link rel="stylesheet" href="./css/neck.css">
     <link rel="stylesheet" href="./css/piano.css">
     <!-- порядок важен: theory.js (NOTES, гаммы, аккорды, строи) → shapes.js (аппликатуры) → fretboard.js (гриф)
-         → instrument.js (гитара/бас: окошки струн, головка, гриф) → piano.js → neck.js → main.js
-         (при запуске вызывает highlightNeck() из neck.js) → sound.js (пользуется всеми предыдущими) -->
+         → instrument.js (гитара/бас: окошки струн, головка, оба грифа) → piano.js → neck.js → main.js
+         (при запуске вызывает highlightNeck() из neck.js) → sound.js (пользуется всеми предыдущими) → jam.js -->
     <script defer src="js/theory.js"></script>
     <script defer src="js/shapes.js"></script>
     <script defer src="js/fretboard.js"></script>
@@ -23,6 +23,7 @@
     <script defer src="js/neck.js"></script>
     <script defer src="js/main.js"></script>
     <script defer src="js/sound.js"></script>
+    <script defer src="js/jam.js"></script>
 </head>
 
 <body>
@@ -32,6 +33,11 @@
                 <path d="M12 2C6.9 2 3.5 3.7 3.5 7.3c0 4.8 5.1 12 7.2 14.1a1.8 1.8 0 0 0 2.6 0c2.1-2.1 7.2-9.3 7.2-14.1C20.5 3.7 17.1 2 12 2z" fill="currentColor"/>
             </svg>
             <h1 class="header__title">My Guitar Tuning</h1>
+            <!-- Learn — всё приложение, Jam — пэд с нотами тональности (jam.js) -->
+            <div class="segmented segmented_small header__mode" role="group" aria-label="Mode">
+                <button class="segmented__btn" data-mode="learn" aria-pressed="true">Learn</button>
+                <button class="segmented__btn" data-mode="jam" aria-pressed="false">Jam</button>
+            </div>
         </div>
     </header>
 
@@ -50,15 +56,11 @@
                     </button>
                 </div>
             </div>
-            <!-- инструмент: гитара или бас (4 или 5 струн), см. instrument.js -->
+            <!-- какая головка показана и каким инструментом звучат фишки и Play (см. instrument.js); строй общий -->
             <div class="instrument">
                 <div class="segmented segmented_small instrument__type" role="group" aria-label="Instrument">
                     <button class="segmented__btn" data-instrument="guitar" aria-pressed="true">Guitar</button>
                     <button class="segmented__btn" data-instrument="bass" aria-pressed="false">Bass</button>
-                </div>
-                <div class="segmented segmented_small instrument__strings" role="group" aria-label="Bass strings" hidden>
-                    <button class="segmented__btn" data-strings="4" aria-pressed="true">4 strings</button>
-                    <button class="segmented__btn" data-strings="5" aria-pressed="false">5 strings</button>
                 </div>
             </div>
             <!-- окошки струн (кнопки) строит instrument.js: слева толстые струны, справа тонкие -->
@@ -128,6 +130,32 @@
                     <span class="hint">Choose a key to highlight it on the neck</span>
                 </div>
             </div>
+        </section>
+
+        <!-- режим джема: пэд только с нотами тональности из карточки Key (jam.js) -->
+        <section class="card jam" aria-labelledby="jamTitle" hidden>
+            <div class="card__head">
+                <h2 class="card__title" id="jamTitle">Jam</h2>
+                <div class="jam__tools">
+                    <div class="segmented segmented_small jam__sound" role="group" aria-label="Jam sound">
+                        <button class="segmented__btn" data-sound="guitar" aria-pressed="true">Guitar</button>
+                        <button class="segmented__btn" data-sound="bass" aria-pressed="false">Bass</button>
+                        <button class="segmented__btn" data-sound="piano" aria-pressed="false">Piano</button>
+                    </div>
+                    <div class="jam__octave">
+                        <button class="jam__octave-btn" type="button" data-step="-1" aria-label="Octave down">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg>
+                        </button>
+                        <span class="jam__octave-label" aria-live="polite"></span>
+                        <button class="jam__octave-btn" type="button" data-step="1" aria-label="Octave up">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <p class="hint jam__hint">Choose a key above — its notes will appear here</p>
+            <div class="jam__pad" role="group" aria-label="Notes of the key" tabindex="-1"></div>
+            <p class="jam__keys">Keyboard: Z…M lower row, A…L middle, Q…O upper · ← → octave</p>
         </section>
 
         <section class="card chord" aria-labelledby="chordTitle">
@@ -204,8 +232,23 @@
                 <h2 class="card__title" id="neckTitle">Fretboard</h2>
                 <ul class="legend" aria-label="Legend" hidden></ul>
             </div>
-            <!-- гриф строит fretboard.js: число струн и ладов — параметры -->
-            <div class="guitar-neck__inner"></div>
+            <!-- гриф гитары строит instrument.js через buildFretboard (fretboard.js) -->
+            <div class="guitar-neck__inner" data-instrument="guitar"></div>
+        </section>
+
+        <section class="card guitar-neck guitar-neck_bass" aria-labelledby="bassTitle">
+            <div class="card__head">
+                <h2 class="card__title" id="bassTitle">Bass</h2>
+                <div class="guitar-neck__tools">
+                    <div class="segmented segmented_small guitar-neck__strings" role="group" aria-label="Bass strings">
+                        <button class="segmented__btn" data-strings="4" aria-pressed="true">4 strings</button>
+                        <button class="segmented__btn" data-strings="5" aria-pressed="false">5 strings</button>
+                    </div>
+                    <button class="sound__btn guitar-neck__toggle" type="button" aria-expanded="true" aria-controls="bassNeck">Hide</button>
+                </div>
+            </div>
+            <!-- гриф баса (4 или 5 струн) строит instrument.js; строй — общий с гитарой -->
+            <div class="guitar-neck__inner" id="bassNeck" data-instrument="bass"></div>
         </section>
 
         <section class="card piano" aria-labelledby="pianoTitle">

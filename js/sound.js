@@ -40,10 +40,9 @@ let isRepeatOn = false
 let repeatTimer = null
 let repeatBox = null
 
-/* MIDI-номер ноты на струне: октава — ближайшая к стандартной высоте этой струны у текущего инструмента
-   (nearestMidi — в theory.js, getStandardMidi — в instrument.js). Drop D гитары -> D2 A2 D3 G3 B3 E4,
-   Drop D баса -> D1 A1 D2 G2. */
-const getStringMidi = box => nearestMidi(pitchOf(box.textContent.trim()), getStandardMidi(Number(box.dataset.string)))
+/* MIDI-номер открытой струны показанной головки: общий строй выбранного в Tuning инструмента (getOpenMidis —
+   в instrument.js). Drop D гитары -> D2 A2 D3 G3 B3 E4, Drop D баса -> D1 A1 D2 G2. */
+const getStringMidi = box => getOpenMidis(getSelectedKey())[box.dataset.string - 1]
 
 const midiToFrequency = midi => 440 * 2 ** ((midi - 69) / 12)
 
@@ -133,23 +132,79 @@ const getPluckBuffer = (midi, timbre) => {
     return pluckBuffers.get(key)
 }
 
-// тембр и октава звуков текущего инструмента: бас — свой тембр и на октаву ниже гитары (фишки, гамма, аккорды)
+/* Тембр и октава звуков инструмента, выбранного в Tuning (струны головки, фишки Key/Chord, Play scale и
+   Play chord): бас — свой тембр и на октаву ниже гитары. Ноты грифов звучат инструментом своей карточки. */
 const instrumentTimbre = () => (isBass() ? 'bass' : 'guitar')
 const instrumentOctave = () => (isBass() ? -12 : 0)
 
-/* Сыграть ноту в момент when (секунды по часам AudioContext) тембром timbre ('guitar' | 'bass');
-   возвращает «голос», чтобы его можно было погасить. midi и timbre в голосе — для проверок. */
-const playMidi = (midi, when, volume = 1, timbre = instrumentTimbre()) => {
-    const ctx = getAudio()
+// щипок струны (Карплус — Стронг, см. synthesizePluck): звучит сам и затихает, отпускать не нужно
+const makePluckVoice = (ctx, midi, when, volume, timbre, output) => {
     const source = ctx.createBufferSource()
     source.buffer = getPluckBuffer(midi, timbre)
     const gain = ctx.createGain()
     gain.gain.value = volume
-    source.connect(gain).connect(masterGain)
+    source.connect(gain).connect(output)
     source.start(when)
-    const voice = { source, gain, midi, timbre, when }
+    return { source, gain }
+}
+
+/* Фортепиано (только в режиме джема). Две волны одной частоты из гармоник со строго кратными частотами,
+   без сэмплов: «удар» (много верхних гармоник) гаснет за доли секунды, «корпус» (низкие гармоники) — медленно,
+   пока клавиша зажата. Так яркость гаснет без фильтра: меняется только громкость волн, а фаза основного тона
+   не сдвигается — высота точная (фильтр с подвижной частотой среза уводил её на доли цента).
+   Удар 5 мс; после отпускания — мягкое затухание (release у голоса). */
+const PIANO_PARTS = [
+    { harmonics: [0, 1, 0.5, 0.25, 0.12, 0.06], level: 0.45, decay: (param, t) => {
+        param.setTargetAtTime(0.22, t, 0.5)
+        param.setTargetAtTime(0, t + 1.2, 3.5)
+    } },
+    { harmonics: [0, 0.6, 0.6, 0.5, 0.4, 0.3, 0.22, 0.15, 0.1, 0.07], level: 0.3, decay: (param, t) => {
+        param.setTargetAtTime(0, t, 0.18)
+    } },
+]
+const pianoWaves = new Map() // волна зависит от AudioContext (в проверках бывает OfflineAudioContext)
+const getPianoWave = (ctx, index) => {
+    if (!pianoWaves.has(ctx)) {
+        pianoWaves.set(ctx, PIANO_PARTS.map(part =>
+            ctx.createPeriodicWave(new Float32Array(part.harmonics.length), Float32Array.from(part.harmonics))))
+    }
+    return pianoWaves.get(ctx)[index]
+}
+const makePianoVoice = (ctx, midi, when, volume, output) => {
+    const frequency = midiToFrequency(midi)
+    const gain = ctx.createGain() // общая громкость голоса — её гасят releaseVoice и cancelVoice
+    gain.gain.value = volume
+    gain.connect(output)
+    const oscillators = PIANO_PARTS.map((part, index) => {
+        const osc = ctx.createOscillator()
+        osc.setPeriodicWave(getPianoWave(ctx, index))
+        osc.frequency.value = frequency
+        const envelope = ctx.createGain()
+        envelope.gain.setValueAtTime(0, when)
+        envelope.gain.linearRampToValueAtTime(part.level, when + 0.005)
+        part.decay(envelope.gain, when + 0.005)
+        osc.connect(envelope).connect(gain)
+        osc.start(when)
+        return osc
+    })
+    // для releaseVoice и activeVoices голос выглядит как щипок: source.stop() и source.onended
+    const source = {
+        stop: time => oscillators.forEach(osc => osc.stop(time)),
+        set onended(callback) { oscillators[0].onended = callback },
+    }
+    return { source, gain, release: 0.12 }
+}
+
+/* Сыграть ноту в момент when (секунды по часам AudioContext) тембром timbre ('guitar' | 'bass' | 'piano');
+   возвращает «голос», чтобы его можно было погасить. midi, timbre и when в голосе — для проверок. */
+const playMidi = (midi, when, volume = 1, timbre = instrumentTimbre()) => {
+    const ctx = getAudio()
+    const voice = timbre === 'piano'
+        ? makePianoVoice(ctx, midi, when, volume, masterGain)
+        : makePluckVoice(ctx, midi, when, volume, timbre, masterGain)
+    Object.assign(voice, { midi, timbre, when })
     activeVoices.add(voice)
-    source.onended = () => activeVoices.delete(voice)
+    voice.source.onended = () => activeVoices.delete(voice)
     return voice
 }
 
@@ -157,8 +212,9 @@ const playMidi = (midi, when, volume = 1, timbre = instrumentTimbre()) => {
 const releaseVoice = (voice, when = audioCtx.currentTime) => {
     if (voice.released) return // повторный stop() у одной ноты старый Safari считает ошибкой
     voice.released = true
-    voice.gain.gain.setTargetAtTime(0, when, 0.03)
-    voice.source.stop(when + 0.2)
+    const fade = voice.release || 0.03 // у фортепиано затухание после отпускания мягче
+    voice.gain.gain.setTargetAtTime(0, when, fade)
+    voice.source.stop(when + Math.max(0.2, fade * 6))
 }
 
 // анимация вспышки; удаление класса и чтение offsetWidth перезапускают анимацию
@@ -187,9 +243,27 @@ const flashPianoKey = midi => {
 
 const later = (callback, ms) => sequenceTimers.push(setTimeout(callback, ms))
 
+/* Заглушить ещё не начавшуюся ноту совсем. releaseVoice тут не подходит: гамма назначает затухание нотам
+   заранее (released уже true), а второй stop() старый Safari считает ошибкой — поэтому громкость в ноль сразу. */
+const cancelVoice = voice => {
+    const now = audioCtx.currentTime
+    voice.gain.gain.cancelScheduledValues(now)
+    voice.gain.gain.setValueAtTime(0, now)
+    voice.released = true
+    voice.cancelled = true // для проверок: нота заглушена до начала
+    try {
+        voice.source.stop(now)
+    } catch (error) {
+        // stop уже назначен раньше — тишину и так даёт нулевая громкость
+    }
+}
+
+/* Прервать последовательность (Play all, гамма, аккорды тональности): таймеры и ещё не начавшиеся ноты —
+   гамма планирует все ноты заранее по часам AudioContext, без этого она доиграла бы до конца. */
 const stopSequence = () => {
     sequenceTimers.forEach(clearTimeout)
     sequenceTimers = []
+    if (audioCtx) activeVoices.forEach(voice => { if (voice.when > audioCtx.currentTime) cancelVoice(voice) })
 }
 
 /* ---------- струны ---------- */
@@ -274,13 +348,14 @@ const getChordVoicing = (root, quality) => {
     return voicing
 }
 
-/* Бой по выбранной аппликатуре (getShapeVoicing из neck.js): ноты с конкретных струн и ладов, от баса вверх;
-   на грифе вспыхивают именно эти клетки. Если позиций нет — запасное расположение getChordVoicing. */
+/* Гитара — бой по выбранной аппликатуре (getShapeVoicing из neck.js): ноты с конкретных струн и ладов,
+   от баса вверх, на гитарном грифе вспыхивают именно эти клетки. Бас (аппликатур нет) и гитара без позиций —
+   запасное расположение getChordVoicing. */
 const strumChord = (root, quality) => {
     const ctx = getAudio()
     chordVoices.forEach(voice => releaseVoice(voice))
     const start = ctx.currentTime + 0.03
-    const shapeNotes = getShapeVoicing()
+    const shapeNotes = isBass() ? null : getShapeVoicing()
     const voicing = shapeNotes ? shapeNotes.map(note => note.midi) : getChordVoicing(root, quality)
     // гитара — бой (почти вместе), бас — арпеджио: аккорд из низких нот вместе звучит грязно
     const step = isBass() ? BASS_ARPEGGIO_STEP : CHORD_STRUM
@@ -310,10 +385,10 @@ const playKeyChords = () => {
 
 /* ---------- отдельные ноты: фишки, гриф, пианино ---------- */
 
-// сыграть одну ноту и подсветить то, на что нажали
-const playNote = (midi, element, flashClass) => {
+// сыграть одну ноту и подсветить то, на что нажали; тембр по умолчанию — инструмента из Tuning
+const playNote = (midi, element, flashClass, timbre = instrumentTimbre()) => {
     stopSequence()
-    playMidi(midi, getAudio().currentTime)
+    playMidi(midi, getAudio().currentTime, 1, timbre)
     flash(element, flashClass)
     flashPianoKey(midi)
 }
@@ -324,9 +399,9 @@ const chipMidi = (root, intervals, chip) => {
     return 48 + instrumentOctave() + NOTES.indexOf(root) + intervals[index]
 }
 
-// нота на грифе: открытая струна этой строки + номер лада (data-string и data-fret ставит fretboard.js)
+// нота на грифе: открытая струна инструмента этого грифа + номер лада (data-string, data-fret — fretboard.js)
 const neckNoteMidi = note =>
-    getStringMidi(document.querySelector(`.app__notes-item_string${note.dataset.string}`)) + Number(note.dataset.fret)
+    getOpenMidis(fretboardKey(note.closest('.guitar-neck__inner')))[note.dataset.string - 1] + Number(note.dataset.fret)
 
 /* Нажатие: мышью — сразу на pointerdown (без задержки до отпускания кнопки), пальцем — по click,
    чтобы прокрутка длинного грифа на телефоне не играла ноты, клавиатурой — по click (detail === 0). */
@@ -364,8 +439,11 @@ onPress(document.querySelector('.key__notes'), '.chip', chip =>
 onPress(document.querySelector('.chord__notes'), '.chip', chip =>
     playNote(chipMidi(chordRootSelect.value, CHORDS[chordQualitySelect.value].intervals, chip), chip, 'chip_playing'))
 
-onPress(document.querySelector('.guitar-neck__inner'), '.note', note =>
-    playNote(neckNoteMidi(note), note, 'note_playing'))
+// ноты грифов: гриф гитары звучит гитарой, гриф баса — басом, кто бы ни был выбран в Tuning
+document.querySelectorAll('.guitar-neck__inner').forEach(board => {
+    const timbre = board.dataset.instrument === 'bass' ? 'bass' : 'guitar'
+    onPress(board, '.note', note => playNote(neckNoteMidi(note), note, 'note_playing', timbre))
+})
 
 onPress(document.querySelector('.piano__keys'), '.piano__key', key =>
     playNote(Number(key.dataset.midi), key, 'piano__key_playing'))

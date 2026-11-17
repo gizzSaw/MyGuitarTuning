@@ -1,35 +1,44 @@
-/* Инструмент: гитара (6 струн) или бас (4 или 5 струн). Здесь — какой выбран (с сохранением в localStorage),
-   окошки струн на головке грифа, нарисованная головка баса и перестройка грифа под число струн.
-   Стандартный строй — INSTRUMENT_TUNINGS в theory.js. Подключается после fretboard.js, до neck.js и main.js:
-   при загрузке строит окошки и гриф, а ноты в них пишет main.js (changeTuning в конце файла). */
+/* Инструменты: гитара (6 струн) и бас (4 или 5 струн). На странице всегда два грифа — карточки Fretboard
+   (гитара) и Bass, а переключатель Guitar | Bass в карточке Tuning выбирает только, чья головка показана
+   (окошки струн, щипок, Repeat, Play all) и каким инструментом звучат фишки Key/Chord, Play scale и Play chord.
+   Строй общий, как в группе: сдвиг от стандартного и Drop (tuningShift, isDropped — в main.js) одинаковы
+   для обоих инструментов. Здесь же: карточка Bass (4 | 5 струн, Hide/Show), сохранение в localStorage,
+   нарисованная головка баса. Подключается после fretboard.js, до neck.js и main.js: при загрузке строит
+   окошки струн и оба грифа, а ноты в них пишет main.js (changeTuning в конце файла). */
 
 const INSTRUMENT_STORAGE_KEY = 'myGuitarTuning.instrument'
 
-let instrumentType = 'guitar' // 'guitar' | 'bass'
-let bassStringCount = 4       // 4 | 5
+let instrumentType = 'guitar' // какой инструмент выбран в карточке Tuning: 'guitar' | 'bass'
+let bassStringCount = 4       // 4 | 5 — у карточки Bass (и у головки, когда выбран бас)
+let isBassCardCollapsed = false
 
 const instrumentTypeBtns = document.querySelectorAll('.instrument__type .segmented__btn') // Guitar | Bass
-const instrumentStringsGroup = document.querySelector('.instrument__strings')            // 4 | 5 strings — только у баса
-const instrumentStringsBtns = instrumentStringsGroup.querySelectorAll('.segmented__btn')
+const bassStringsBtns = document.querySelectorAll('.guitar-neck__strings .segmented__btn') // 4 | 5 strings
+const bassToggleBtn = document.querySelector('.guitar-neck__toggle')                       // Hide | Show
+const guitarBoard = document.querySelector('.guitar-neck__inner[data-instrument="guitar"]')
+const bassBoard = document.querySelector('.guitar-neck__inner[data-instrument="bass"]')
 const headstockLeft = document.querySelector('.app__notes_left')
 const headstockRight = document.querySelector('.app__notes_right')
 const guitarHeadstock = document.querySelector('.app__img_guitar') // фото головки 3+3
 const bassHeadstock = document.querySelector('.app__img_bass')     // SVG, рисуем ниже
 
 const isBass = () => instrumentType === 'bass'
-const getTuningKey = () => (isBass() ? `bass${bassStringCount}` : 'guitar6')
-const getStringCount = () => INSTRUMENT_TUNINGS[getTuningKey()].length
+const getBassKey = () => `bass${bassStringCount}`
+const getSelectedKey = () => (isBass() ? getBassKey() : 'guitar6')
 
-// стандартная высота открытой струны в MIDI; струна 1 — самая тонкая
-const getStandardMidi = string => INSTRUMENT_TUNINGS[getTuningKey()][string - 1]
+// какой строй у грифа: data-instrument контейнера -> ключ INSTRUMENT_TUNINGS
+const fretboardKey = board => (board.dataset.instrument === 'bass' ? getBassKey() : 'guitar6')
 
-// интервалы стандартного строя от самой толстой струны к самой тонкой: гитара 0 5 10 15 19 24, бас 0 5 10 15 (20)
-const getTuningSteps = () => {
-    const thickToThin = INSTRUMENT_TUNINGS[getTuningKey()].slice().reverse()
-    return thickToThin.map(midi => midi - thickToThin[0])
+/* Открытые струны инструмента в MIDI по номеру струны ([0] — 1-я, самая тонкая) при общем строе:
+   стандартный строй + сдвиг tuningShift (−6…+5). В Drop самая толстая струна остаётся на сдвиге, а остальные
+   на 2 полутона выше (гитара Drop D: D2 A2 D3 G3 B3 E4, бас Drop D: D1 A1 D2 G2, 5-струнный Drop A: A0 E1 A1 D2 G2).
+   Сдвиг один на весь инструмент, поэтому струны всегда идут по возрастанию. */
+const getOpenMidis = key => {
+    const standard = INSTRUMENT_TUNINGS[key]
+    return standard.map((midi, i) => midi + tuningShift + (isDropped && i < standard.length - 1 ? 2 : 0))
 }
 
-// окошки струн, отсортированные по номеру струны (1 — самая тонкая); их число зависит от инструмента
+// окошки струн показанной головки, по номеру струны (1 — самая тонкая)
 const getStringBoxes = () => [...document.querySelectorAll('.app__notes-item')]
     .sort((a, b) => a.dataset.string - b.dataset.string)
 
@@ -38,16 +47,19 @@ const loadInstrument = () => {
         const saved = JSON.parse(localStorage.getItem(INSTRUMENT_STORAGE_KEY))
         if (saved && saved.type === 'bass') instrumentType = 'bass'
         if (saved && [4, 5].includes(saved.strings)) bassStringCount = saved.strings
+        if (saved && saved.bassCollapsed === true) isBassCardCollapsed = true
     } catch (error) {
-        // localStorage недоступен (приватный режим, файл с диска в некоторых браузерах) — остаётся гитара
+        // localStorage недоступен (приватный режим, файл с диска в некоторых браузерах) — всё по умолчанию
     }
 }
 
 const saveInstrument = () => {
     try {
-        localStorage.setItem(INSTRUMENT_STORAGE_KEY, JSON.stringify({ type: instrumentType, strings: bassStringCount }))
+        localStorage.setItem(INSTRUMENT_STORAGE_KEY, JSON.stringify({
+            type: instrumentType, strings: bassStringCount, bassCollapsed: isBassCardCollapsed,
+        }))
     } catch (error) {
-        // не сохранилось — не страшно, при следующем открытии будет гитара
+        // не сохранилось — не страшно, при следующем открытии будет по умолчанию
     }
 }
 
@@ -84,10 +96,10 @@ const drawBassHeadstock = (leftStrings, rightStrings, count) => {
         <rect class="headstock__nut" x="84" y="244" width="52" height="6" rx="1"/>`
 }
 
-/* Окошки струн: слева — толстые, справа — тонкие; в колонке сверху вниз — к более толстой
-   (гитара: 4 5 6 | 3 2 1, бас 4: 3 4 | 2 1, бас 5: 3 4 5 | 2 1). Текст в них пишет main.js. */
+/* Головка выбранного инструмента. Окошки: слева — толстые струны, справа — тонкие; в колонке сверху вниз —
+   к более толстой (гитара: 4 5 6 | 3 2 1, бас 4: 3 4 | 2 1, бас 5: 3 4 5 | 2 1). Текст в них пишет main.js. */
 const renderHeadstock = () => {
-    const count = getStringCount()
+    const count = INSTRUMENT_TUNINGS[getSelectedKey()].length
     const leftCount = Math.ceil(count / 2)
     const leftStrings = Array.from({ length: leftCount }, (_, i) => count - leftCount + 1 + i)
     const rightStrings = Array.from({ length: count - leftCount }, (_, i) => count - leftCount - i)
@@ -106,37 +118,49 @@ const renderHeadstock = () => {
     bassHeadstock.innerHTML = isBass() ? drawBassHeadstock(leftStrings, rightStrings, count) : ''
 }
 
-/* Применить инструмент: переключатели, головка, гриф и строй — стандартный, по самой толстой струне
-   (гитара — E, бас 4 — E, бас 5 — B). Ноты в окошки и на гриф пишет main.js (changeTuning). */
-const applyInstrument = () => {
+// переключатели в карточках Tuning и Bass и свёрнутость карточки Bass
+const renderInstrumentControls = () => {
     instrumentTypeBtns.forEach(btn => btn.setAttribute('aria-pressed', btn.dataset.instrument === instrumentType))
-    instrumentStringsBtns.forEach(btn => btn.setAttribute('aria-pressed', Number(btn.dataset.strings) === bassStringCount))
-    instrumentStringsGroup.hidden = !isBass()
-    renderHeadstock()
-    buildFretboard(getStringCount())
-    const thickest = INSTRUMENT_TUNINGS[getTuningKey()].at(-1)
-    document.querySelector('#currentTuning').textContent = NOTES[thickest % 12]
+    bassStringsBtns.forEach(btn => btn.setAttribute('aria-pressed', Number(btn.dataset.strings) === bassStringCount))
+    bassBoard.hidden = isBassCardCollapsed
+    bassToggleBtn.setAttribute('aria-expanded', !isBassCardCollapsed)
+    bassToggleBtn.textContent = isBassCardCollapsed ? 'Show' : 'Hide'
 }
 
-// переключили инструмент: всё перестроить; neck.js собирает клетки грифа заново, main.js пишет строй
-const switchInstrument = () => {
-    saveInstrument()
-    applyInstrument()
-    refreshNeckCells()
-    setDropped(false)
-}
-
+// Guitar | Bass: другая головка, строй тот же; грифы не перестраиваются. Повтор струны старой головки — стоп
 instrumentTypeBtns.forEach(btn => btn.addEventListener('click', () => {
     if (btn.dataset.instrument === instrumentType) return
     instrumentType = btn.dataset.instrument
-    switchInstrument()
+    saveInstrument()
+    stopPlayback()
+    renderInstrumentControls()
+    renderHeadstock()
+    changeTuning()
 }))
 
-instrumentStringsBtns.forEach(btn => btn.addEventListener('click', () => {
+// 4 | 5 струн: перестраиваем только гриф баса (и головку, если показан бас)
+bassStringsBtns.forEach(btn => btn.addEventListener('click', () => {
     if (Number(btn.dataset.strings) === bassStringCount) return
     bassStringCount = Number(btn.dataset.strings)
-    switchInstrument()
+    saveInstrument()
+    renderInstrumentControls()
+    buildFretboard(bassBoard, bassStringCount)
+    refreshNeckCells()
+    if (isBass()) {
+        stopPlayback()
+        renderHeadstock()
+    }
+    changeTuning()
 }))
 
+bassToggleBtn.addEventListener('click', () => {
+    isBassCardCollapsed = !isBassCardCollapsed
+    saveInstrument()
+    renderInstrumentControls()
+})
+
 loadInstrument()
-applyInstrument()
+renderInstrumentControls()
+renderHeadstock()
+buildFretboard(guitarBoard, INSTRUMENT_TUNINGS.guitar6.length)
+buildFretboard(bassBoard, bassStringCount)

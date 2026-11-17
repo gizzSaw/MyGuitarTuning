@@ -95,8 +95,9 @@ body {
 
 .header__inner {
   display: flex;
+  flex-wrap: wrap; /* на узком экране Learn | Jam уходит на свою строку, а заголовок не переносится */
   align-items: center;
-  gap: 10px;
+  gap: 8px 10px;
 }
 
 .header__logo {
@@ -110,6 +111,11 @@ body {
   font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.01em;
+}
+
+/* Learn | Jam — справа в шапке */
+.header__mode {
+  margin-left: auto;
 }
 
 /* сетка карточек: на широком экране «Tuning» и «Key» рядом, гриф во всю ширину */
@@ -148,6 +154,19 @@ body {
 }
 
 .card__head .card__title {
+  margin-bottom: 0;
+}
+
+/* заголовок карточки Bass: 4 | 5 струн и Hide/Show */
+.guitar-neck__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+/* свёрнутая карточка Bass: под заголовком ничего нет — убираем его нижний отступ */
+.guitar-neck_bass:has(.guitar-neck__inner[hidden]) .card__head {
   margin-bottom: 0;
 }
 
@@ -246,7 +265,7 @@ body {
   color: var(--text-muted);
 }
 
-/* переключатель инструмента: Guitar | Bass и у баса 4 | 5 струн */
+/* переключатель инструмента в карточке Tuning: Guitar | Bass */
 .instrument {
   display: flex;
   flex-wrap: wrap;
@@ -672,6 +691,133 @@ body {
   opacity: 0.7;
 }
 
+/* режим джема: пэд — сетка, ряды — октавы (сверху верхняя), столбцы — ступени гаммы (--degrees ставит jam.js) */
+.jam__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.jam__octave {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.jam__octave-btn {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  background-color: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  transition: background-color var(--ease);
+}
+
+.jam__octave-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.jam__octave-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.jam__octave-label {
+  min-width: 86px;
+  text-align: center;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+.jam__hint {
+  text-align: center;
+}
+
+.jam__pad {
+  display: grid;
+  grid-template-columns: repeat(var(--degrees, 7), minmax(0, 1fr));
+  gap: 8px;
+  /* играть, а не прокручивать и выделять: жесты пальцем на пэде обрабатывает jam.js */
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* фокус на пэд ставит jam.js (чтобы работали клавиши) — рамка вокруг всего пэда не нужна */
+.jam__pad:focus-visible {
+  outline: none;
+}
+
+.jam__btn {
+  min-width: 0;
+  min-height: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background-color: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  transition: background-color 0.08s ease, transform 0.08s ease;
+}
+
+.jam__btn_root {
+  background-color: var(--root);
+  border-color: var(--root);
+  color: var(--accent-ink);
+}
+
+.jam__btn_active {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  transform: scale(0.96);
+}
+
+.jam__note {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.jam__degree {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.jam__key {
+  padding: 0 6px;
+  border-radius: 6px;
+  background-color: var(--line);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.jam__keys {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* на сенсорных экранах без мыши подписи клавиш не нужны */
+@media (hover: none) {
+  .jam__key,
+  .jam__keys {
+    display: none;
+  }
+}
+
 /* легенда над грифом; пункты рисует neck.js */
 .legend {
   display: flex;
@@ -730,6 +876,8 @@ body {
   .sound__btn:hover:not([aria-pressed="true"]):not(:disabled),
   .select:hover,
   .chord__shape-btn:hover:not(:disabled),
+  .jam__octave-btn:hover:not(:disabled),
+  .jam__btn:hover:not(.jam__btn_active):not(.jam__btn_root),
   .chord__item:hover:not([aria-pressed="true"]) {
     background-color: var(--surface-3);
   }
@@ -743,19 +891,54 @@ body {
       "tuning key"
       "tuning chord"
       "neck neck"
+      "bass bass"
       "piano piano";
   }
 
+  /* режим джема: Key и пэд рядом, грифы и пианино снизу */
+  .main.main_jam {
+    grid-template-columns: 1fr 2fr;
+    grid-template-areas:
+      "key jam"
+      "neck neck"
+      "bass bass"
+      "piano piano";
+  }
+
+  .jam { grid-area: jam; }
   .tuning { grid-area: tuning; }
   .key { grid-area: key; }
   .chord { grid-area: chord; }
   .guitar-neck { grid-area: neck; }
+  .guitar-neck_bass { grid-area: bass; }
   .piano { grid-area: piano; }
 }
 
 @media (max-width: 400px) {
   .card {
     padding: 16px;
+  }
+
+  /* 7 нот в ряд на 320px — каждый пиксель ширины на кнопки: меньше отступы, без номера ступени */
+  .jam {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .jam__pad {
+    gap: 4px;
+  }
+
+  .jam__btn {
+    min-height: 68px;
+  }
+
+  .jam__note {
+    font-size: 15px;
+  }
+
+  .jam__degree {
+    display: none;
   }
 
   /* 7 фишек гаммы с бемолями (E♭ A♭ B♭) должны помещаться в одну строку и на 320px */
