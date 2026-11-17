@@ -14,14 +14,18 @@ const keyNotesLine = document.querySelector('.key__notes')
 // аккорд
 const chordRootSelect = document.querySelector('#chordRoot')
 const chordQualitySelect = document.querySelector('#chordQuality')
-const chordSizeGroup = document.querySelector('.chord__size')
-const chordSizeBtns = chordSizeGroup.querySelectorAll('.segmented__btn') // Triads | 7th
+const chordKeyTools = document.querySelector('.chord__key-tools') // Triads | 7th и Play all — только при выбранной тональности
+const chordSizeBtns = document.querySelectorAll('.chord__size .segmented__btn') // Triads | 7th
 let chordSize = 3
 const chordKeyTitle = document.querySelector('.chord__key-title')
 const chordList = document.querySelector('.chord__list')
 const chordNotesLine = document.querySelector('.chord__notes')
 
 const neckLegend = document.querySelector('.legend')
+
+// кнопки воспроизведения (их обработчики — в sound.js); неактивны, пока нечего играть
+const keyPlayButton = document.querySelector('.key__play')
+const chordPlayButton = document.querySelector('.chord__play')
 
 // типы аккордов в списке берём из CHORDS, чтобы не дублировать их в HTML
 Object.entries(CHORDS).forEach(([quality, chord]) => chordQualitySelect.add(new Option(chord.label, quality)))
@@ -57,7 +61,7 @@ const renderKeyNotes = (keyRoot, scaleNotes) => {
 
 // аккорды выбранной тональности: кнопки, по клику аккорд показывается на грифе
 const renderKeyChords = keyRoot => {
-    chordSizeGroup.hidden = !keyRoot
+    chordKeyTools.hidden = !keyRoot
     if (!keyRoot) {
         chordKeyTitle.textContent = 'Chords in key'
         chordList.replaceChildren(makeHint(chordListHint))
@@ -134,6 +138,8 @@ const highlightNeck = () => {
     renderKeyChords(keyRoot)
     renderChordNotes(chordRoot)
     renderLegend(chordRoot ? (keyRoot ? 'chordInKey' : 'chord') : (keyRoot ? 'key' : ''))
+    keyPlayButton.disabled = !keyRoot
+    chordPlayButton.disabled = !chordRoot
 }
 
 keyRootSelect.addEventListener('change', highlightNeck)

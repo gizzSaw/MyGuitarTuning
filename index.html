@@ -34,7 +34,7 @@
             <div class="card__head">
                 <h2 class="card__title" id="tuningTitle">Tuning</h2>
                 <div class="sound">
-                    <button class="sound__btn sound__all" type="button">
+                    <button class="sound__btn sound__btn_play sound__all" type="button">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"/></svg>
                         Play all
                     </button>
@@ -86,7 +86,13 @@
         </section>
 
         <section class="card key" aria-labelledby="keyTitle">
-            <h2 class="card__title" id="keyTitle">Key</h2>
+            <div class="card__head">
+                <h2 class="card__title" id="keyTitle">Key</h2>
+                <button class="sound__btn sound__btn_play key__play" type="button" disabled>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"/></svg>
+                    Play scale
+                </button>
+            </div>
             <div class="key__body">
                 <div class="key__inner">
                     <select class="select" id="keyRoot" aria-label="Key root note">
@@ -117,7 +123,13 @@
         </section>
 
         <section class="card chord" aria-labelledby="chordTitle">
-            <h2 class="card__title" id="chordTitle">Chord</h2>
+            <div class="card__head">
+                <h2 class="card__title" id="chordTitle">Chord</h2>
+                <button class="sound__btn sound__btn_play chord__play" type="button" disabled>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"/></svg>
+                    Play chord
+                </button>
+            </div>
             <div class="chord__inner">
                 <select class="select" id="chordRoot" aria-label="Chord root note">
                     <option value="">Off</option>
@@ -143,9 +155,15 @@
             <div class="chord__key">
                 <div class="chord__key-head">
                     <span class="chord__key-title">Chords in key</span>
-                    <div class="segmented segmented_small chord__size" role="group" aria-label="Chord size" hidden>
-                        <button class="segmented__btn" data-size="3" aria-pressed="true">Triads</button>
-                        <button class="segmented__btn" data-size="4" aria-pressed="false">7th</button>
+                    <div class="chord__key-tools" hidden>
+                        <div class="segmented segmented_small chord__size" role="group" aria-label="Chord size">
+                            <button class="segmented__btn" data-size="3" aria-pressed="true">Triads</button>
+                            <button class="segmented__btn" data-size="4" aria-pressed="false">7th</button>
+                        </div>
+                        <button class="sound__btn sound__btn_play chord__play-all" type="button">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"/></svg>
+                            Play all
+                        </button>
                     </div>
                 </div>
                 <div class="chord__list">

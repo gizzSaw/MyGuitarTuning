@@ -335,9 +335,15 @@ body {
   stroke-linejoin: round;
 }
 
-.sound__all svg {
+/* кнопки с треугольником ▶ */
+.sound__btn_play svg {
   fill: currentColor;
   stroke: none;
+}
+
+.sound__btn:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .sound__btn[aria-pressed="true"] {
@@ -417,6 +423,17 @@ body {
   box-shadow: inset 0 0 0 2px var(--text);
 }
 
+/* нота звучит (гамма, аккорд) */
+.chip_playing {
+  animation: chip-pop 0.45s ease-out;
+}
+
+@keyframes chip-pop {
+  40% {
+    transform: scale(1.25);
+  }
+}
+
 .hint {
   font-size: 14px;
   line-height: 32px;
@@ -482,6 +499,14 @@ body {
 .chord__key-title {
   font-size: 14px;
   font-weight: 600;
+}
+
+.chord__key-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .chord__list {
@@ -572,7 +597,7 @@ body {
 
   .control__btn:hover,
   .app__notes-item:hover,
-  .sound__btn:hover:not([aria-pressed="true"]),
+  .sound__btn:hover:not([aria-pressed="true"]):not(:disabled),
   .select:hover,
   .chord__item:hover:not([aria-pressed="true"]) {
     background-color: var(--surface-3);

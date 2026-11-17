@@ -172,6 +172,25 @@
 .fret_0 .note.note_root { color: var(--root); }
 .fret_0 .note.note_key { color: var(--text); }
 
+/* нота звучит — расходящееся кольцо (только box-shadow: transform у .note занят центровкой) */
+.note.note_playing {
+    animation: note-ring 0.6s ease-out;
+}
+
+@keyframes note-ring {
+    0% {
+        box-shadow: 0 0 0 0 rgba(247, 194, 35, 0.9);
+    }
+
+    100% {
+        box-shadow: 0 0 0 12px rgba(247, 194, 35, 0);
+    }
+}
+
+.fret_0 .note.note_playing {
+    animation: none;
+}
+
 @media (max-width: 760px) {
     .guitar-neck__inner {
         --open-size: 34px;
