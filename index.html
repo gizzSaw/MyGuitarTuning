@@ -112,11 +112,8 @@
                             <option>A#</option>
                             <option>B</option>
                     </select>
-                    <div class="segmented key__types" role="group" aria-label="Scale">
-                        <button class="segmented__btn" data-scale="major" aria-pressed="true">Major</button>
-                        <button class="segmented__btn" data-scale="minor" aria-pressed="false">Minor</button>
-                        <button class="segmented__btn" data-scale="blues" aria-pressed="false">Blues</button>
-                    </div>
+                    <!-- гаммы с группами добавляет neck.js из SCALE_GROUPS (theory.js) -->
+                    <select class="select" id="keyType" aria-label="Scale"></select>
                 </div>
                 <div class="key__notes" aria-live="polite">
                     <span class="hint">Choose a key to highlight it on the neck</span>

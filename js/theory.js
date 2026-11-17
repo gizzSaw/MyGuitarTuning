@@ -7,10 +7,46 @@ const NOTES = [ 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B' 
 
 // ступени гаммы — интервалы от тоники в полутонах
 const SCALES = {
-    major: [0, 2, 4, 5, 7, 9, 11], // натуральный мажор
-    minor: [0, 2, 3, 5, 7, 8, 10], // натуральный минор
-    blues: [0, 3, 5, 6, 7, 10],    // блюзовая гамма (минорная): 1 b3 4 b5 5 b7
+    major: [0, 2, 4, 5, 7, 9, 11],         // натуральный мажор (ионийский лад)
+    minor: [0, 2, 3, 5, 7, 8, 10],         // натуральный минор (эолийский лад)
+    harmonicMinor: [0, 2, 3, 5, 7, 8, 11], // гармонический минор: VII ступень повышена
+    majorPentatonic: [0, 2, 4, 7, 9],      // мажорная пентатоника: мажор без 4 и 7
+    minorPentatonic: [0, 3, 5, 7, 10],     // минорная пентатоника: минор без 2 и 6
+    blues: [0, 3, 5, 6, 7, 10],            // блюзовая гамма (минорная): 1 b3 4 b5 5 b7
+    dorian: [0, 2, 3, 5, 7, 9, 10],        // лады — мажорная гамма от другой ступени
+    phrygian: [0, 1, 3, 5, 7, 8, 10],
+    lydian: [0, 2, 4, 6, 7, 9, 11],
+    mixolydian: [0, 2, 4, 5, 7, 9, 10],
+    locrian: [0, 1, 3, 5, 6, 8, 10],
 }
+
+// названия гамм (в заголовках) и группы для select'а выбора гаммы
+const SCALE_NAMES = {
+    major: 'Major',
+    minor: 'Minor',
+    harmonicMinor: 'Harmonic minor',
+    majorPentatonic: 'Major pentatonic',
+    minorPentatonic: 'Minor pentatonic',
+    blues: 'Blues',
+    dorian: 'Dorian',
+    phrygian: 'Phrygian',
+    lydian: 'Lydian',
+    mixolydian: 'Mixolydian',
+    locrian: 'Locrian',
+}
+
+const SCALE_GROUPS = [
+    ['Major & minor', ['major', 'minor', 'harmonicMinor']],
+    ['Pentatonic & blues', ['majorPentatonic', 'minorPentatonic', 'blues']],
+    ['Modes', ['dorian', 'phrygian', 'lydian', 'mixolydian', 'locrian']],
+]
+
+// мажор и минор — это ионийский и эолийский лады; отдельными пунктами их не дублируем, только подписываем
+const SCALE_ALIASES = { major: 'Ionian', minor: 'Aeolian' }
+
+/* Родительская гамма для неполных (не 7-ступенных) гамм. Пентатоники берут аккорды родительской
+   тональности: пентатонику играют поверх её аккордов, а сложить терциями 5 ступеней нельзя. */
+const PARENT_SCALES = { majorPentatonic: 'major', minorPentatonic: 'minor', blues: 'minor' }
 
 // аккорды: интервалы от основного тона в полутонах, приписка к названию и подпись для списка
 const CHORDS = {
@@ -19,15 +55,18 @@ const CHORDS = {
     dom7:  { suffix: '7',    label: 'Dominant 7 (7)',   intervals: [0, 4, 7, 10] },
     maj7:  { suffix: 'maj7', label: 'Major 7 (maj7)',   intervals: [0, 4, 7, 11] },
     m7:    { suffix: 'm7',   label: 'Minor 7 (m7)',     intervals: [0, 3, 7, 10] },
+    mMaj7: { suffix: 'm(maj7)', label: 'Minor-major 7 (m(maj7))', intervals: [0, 3, 7, 11] },
     dim:   { suffix: 'dim',  label: 'Diminished (dim)', intervals: [0, 3, 6] },
     m7b5:  { suffix: 'm7♭5', label: 'Half-dim (m7♭5)',  intervals: [0, 3, 6, 10] },
+    dim7:  { suffix: 'dim7', label: 'Diminished 7 (dim7)', intervals: [0, 3, 6, 9] },
     aug:   { suffix: 'aug',  label: 'Augmented (aug)',  intervals: [0, 4, 8] },
+    augMaj7: { suffix: 'maj7♯5', label: 'Augmented major 7 (maj7♯5)', intervals: [0, 4, 8, 11] },
     sus2:  { suffix: 'sus2', label: 'Sus2',             intervals: [0, 2, 7] },
     sus4:  { suffix: 'sus4', label: 'Sus4',             intervals: [0, 5, 7] },
 }
 
-// название ступени аккорда по интервалу от основного тона
-const DEGREES = { 0: 'R', 2: '2', 3: '♭3', 4: '3', 5: '4', 6: '♭5', 7: '5', 8: '♯5', 10: '♭7', 11: '7' }
+// название ступени аккорда по интервалу от основного тона (9 бывает только в dim7 — уменьшённая септима)
+const DEGREES = { 0: 'R', 2: '2', 3: '♭3', 4: '3', 5: '4', 6: '♭5', 7: '5', 8: '♯5', 9: '♭♭7', 10: '♭7', 11: '7' }
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII']
 
@@ -49,7 +88,10 @@ const getChordName = (root, quality) => root + CHORDS[quality].suffix
 const getNumeral = (degree, quality) => {
     const numeral = ROMAN[degree]
     const minorThird = CHORDS[quality].intervals[1] === 3
-    const marks = { dim: '°', aug: '+', dom7: '7', maj7: 'maj7', m7: '7', m7b5: 'ø7' }
+    const marks = {
+        dim: '°', aug: '+', dom7: '7', maj7: 'maj7', m7: '7', m7b5: 'ø7',
+        dim7: '°7', mMaj7: '(maj7)', augMaj7: '+maj7',
+    }
     return (minorThird ? numeral.toLowerCase() : numeral) + (marks[quality] || '')
 }
 
@@ -59,9 +101,11 @@ const findChordQuality = intervals =>
 
 /* Аккорды тональности. size: 3 — трезвучия, 4 — септаккорды.
    Для 7-ступенных гамм на каждой ступени складываем ноты гаммы через одну (по терциям):
-   C major -> C Dm Em F G Am Bdim. В блюзовой гамме 6 ступеней, терциями её не сложить,
-   поэтому берём классические для блюза I, IV, V (септаккорды — I7, IV7, V7). */
+   C major -> C Dm Em F G Am Bdim, A harmonic minor -> Am Bdim Caug Dm E F G#dim.
+   Неполные гаммы терциями не сложить: в блюзе берём классические I, IV, V (септаккорды — I7, IV7, V7),
+   у пентатоник — аккорды родительской тональности (C major pentatonic -> аккорды C major). */
 const getKeyChords = (root, type, size) => {
+    if (type !== 'blues' && PARENT_SCALES[type]) return getKeyChords(root, PARENT_SCALES[type], size)
     if (type === 'blues') {
         const quality = size === 4 ? 'dom7' : 'major'
         return [[0, 0], [5, 3], [7, 4]].map(([semitones, degree]) => ({

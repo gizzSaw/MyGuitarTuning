@@ -7,8 +7,7 @@ const neckNotes = document.querySelectorAll('.guitar-neck .note')
 
 // тональность
 const keyRootSelect = document.querySelector('#keyRoot')
-const keyTypeBtns = document.querySelectorAll('.key__types .segmented__btn') // Major | Minor | Blues
-let keyType = 'major'
+const keyTypeSelect = document.querySelector('#keyType') // тип гаммы: ключ из SCALES
 const keyNotesLine = document.querySelector('.key__notes')
 
 // аккорд
@@ -27,10 +26,17 @@ const neckLegend = document.querySelector('.legend')
 const keyPlayButton = document.querySelector('.key__play')
 const chordPlayButton = document.querySelector('.chord__play')
 
-// типы аккордов в списке берём из CHORDS, чтобы не дублировать их в HTML
+// гаммы и типы аккордов в списках берём из theory.js, чтобы не дублировать их в HTML
+SCALE_GROUPS.forEach(([groupLabel, types]) => {
+    const group = document.createElement('optgroup')
+    group.label = groupLabel
+    types.forEach(type => {
+        const alias = SCALE_ALIASES[type]
+        group.append(new Option(alias ? `${SCALE_NAMES[type]} (${alias})` : SCALE_NAMES[type], type))
+    })
+    keyTypeSelect.append(group)
+})
 Object.entries(CHORDS).forEach(([quality, chord]) => chordQualitySelect.add(new Option(chord.label, quality)))
-
-const SCALE_LABELS = { major: 'Major', minor: 'Minor', blues: 'Blues' }
 
 // подсказки берём из разметки, чтобы текст был в одном месте
 const hintText = element => element.querySelector('.hint').textContent.trim()
@@ -71,7 +77,12 @@ const renderKeyChords = keyRoot => {
         chordList.replaceChildren(makeHint(chordListHint))
         return
     }
-    chordKeyTitle.textContent = `Chords in ${keyRoot} ${SCALE_LABELS[keyType]}`
+    const keyType = keyTypeSelect.value
+    // у пентатоник аккорды родительской тональности (см. getKeyChords) — так и подписываем
+    const isPentatonic = keyType !== 'blues' && PARENT_SCALES[keyType]
+    chordKeyTitle.textContent = isPentatonic
+        ? `Chords in ${keyRoot} ${SCALE_NAMES[PARENT_SCALES[keyType]]} (parent key)`
+        : `Chords in ${keyRoot} ${SCALE_NAMES[keyType]}`
     chordList.replaceChildren(...getKeyChords(keyRoot, keyType, chordSize).map(chord => {
         const btn = makeElement('button', 'chord__item')
         btn.dataset.root = chord.root
@@ -121,7 +132,7 @@ const renderLegend = mode => {
 const highlightNeck = () => {
     const keyRoot = keyRootSelect.value     // '' — тональность не выбрана
     const chordRoot = chordRootSelect.value // '' — аккорд не выбран
-    const scaleNotes = keyRoot ? getScaleNotes(keyRoot, keyType) : []
+    const scaleNotes = keyRoot ? getScaleNotes(keyRoot, keyTypeSelect.value) : []
     const chordNotes = chordRoot ? getChordNotes(chordRoot, chordQualitySelect.value) : []
 
     const mainRoot = chordRoot || keyRoot
@@ -148,16 +159,9 @@ const highlightNeck = () => {
 }
 
 keyRootSelect.addEventListener('change', highlightNeck)
+keyTypeSelect.addEventListener('change', highlightNeck)
 chordRootSelect.addEventListener('change', highlightNeck)
 chordQualitySelect.addEventListener('change', highlightNeck)
-
-keyTypeBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        keyType = btn.dataset.scale
-        setPressed(keyTypeBtns, other => other === btn)
-        highlightNeck()
-    })
-})
 
 chordSizeBtns.forEach(btn => {
     btn.addEventListener('click', () => {

@@ -2,7 +2,7 @@
    ноты на грифе и клавиши пианино. Звук синтезируется алгоритмом Карплуса — Стронга
    (модель дёрнутой струны), аудиофайлов нет.
    Подключается последним: пользуется NOTES/SCALES/CHORDS/getKeyChords (theory.js), select'ами,
-   keyType/chordSize, neckNotes и highlightNeck() из neck.js. */
+   chordSize, neckNotes и highlightNeck() из neck.js. */
 
 // высота открытых струн в стандартном строе, MIDI-номера: E2 A2 D3 G3 B3 E4
 const STANDARD_MIDI = { 6: 40, 5: 45, 4: 50, 3: 55, 2: 59, 1: 64 }
@@ -231,7 +231,8 @@ const playScale = () => {
     if (!root) return
     const ctx = getAudio()
     const rootMidi = 48 + NOTES.indexOf(root)
-    const steps = [...SCALES[keyType], 12]
+    // гамма любой длины (5–7 ступеней) и сверху октава тоники
+    const steps = [...SCALES[keyTypeSelect.value], 12]
     const start = ctx.currentTime + 0.05
     steps.forEach((interval, i) => {
         const when = start + i * SCALE_STEP
@@ -276,7 +277,7 @@ const playSelectedChord = () => {
 const playKeyChords = () => {
     const keyRoot = keyRootSelect.value
     if (!keyRoot) return
-    const chords = getKeyChords(keyRoot, keyType, chordSize)
+    const chords = getKeyChords(keyRoot, keyTypeSelect.value, chordSize)
     ;[...chords, chords[0]].forEach((chord, i) => later(() => {
         chordRootSelect.value = chord.root
         chordQualitySelect.value = chord.quality
@@ -339,7 +340,7 @@ onPress(document.querySelector('.app__inner'), '.app__notes-item', box => {
 })
 
 onPress(document.querySelector('.key__notes'), '.chip', chip =>
-    playNote(chipMidi(keyRootSelect.value, SCALES[keyType], chip), chip, 'chip_playing'))
+    playNote(chipMidi(keyRootSelect.value, SCALES[keyTypeSelect.value], chip), chip, 'chip_playing'))
 
 onPress(document.querySelector('.chord__notes'), '.chip', chip =>
     playNote(chipMidi(chordRootSelect.value, CHORDS[chordQualitySelect.value].intervals, chip), chip, 'chip_playing'))
@@ -387,5 +388,5 @@ document.querySelector('.chord__list').addEventListener('click', event => {
 })
 
 // пользователь что-то поменял сам — последовательность (Play all, гамма, аккорды тональности) прерываем
-;[keyRootSelect, chordRootSelect, chordQualitySelect].forEach(select => select.addEventListener('change', stopSequence))
-;[...keyTypeBtns, ...chordSizeBtns].forEach(btn => btn.addEventListener('click', stopSequence))
+;[keyRootSelect, keyTypeSelect, chordRootSelect, chordQualitySelect].forEach(select => select.addEventListener('change', stopSequence))
+chordSizeBtns.forEach(btn => btn.addEventListener('click', stopSequence))
