@@ -1,0 +1,703 @@
+/* Страница About (about.html). Тема приложения: шапка, карточки .card и переменные-цвета из style.css.
+   Блоки: about (страница), toc (оглавление), steps (быстрый старт), controls (кнопки блока и что они делают),
+   ui-name (название кнопки, как в интерфейсе), ui-key (клавиша), affects (на что влияет блок),
+   links (схема связей), palette (цвета подсветки), keyboard (клавиатура джема), table. */
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+.about {
+  display: grid;
+  gap: 16px;
+  padding-top: 16px;
+  padding-bottom: 40px;
+}
+
+/* при переходе по якорю карточка не прилипает к краю окна и подсвечивается */
+.about__section {
+  container-type: inline-size; /* .controls в две колонки — по ширине карточки или колонки текста */
+  scroll-margin-top: 16px;
+}
+
+.about__section:target {
+  border-color: var(--accent-dim);
+}
+
+.about__title {
+  margin-bottom: 12px;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.about__lead {
+  margin-bottom: 10px;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.about__subtitle {
+  margin: 22px 0 10px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.about__subtitle:first-of-type {
+  margin-top: 0;
+}
+
+.about__text {
+  margin-bottom: 12px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.about__text_muted {
+  color: var(--text-muted);
+}
+
+.about__link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: var(--accent-dim);
+  text-underline-offset: 3px;
+}
+
+/* скриншот на фоне страницы: его углы (фон приложения) сливаются с рамкой */
+.about__figure {
+  margin-bottom: 16px;
+  padding: 10px;
+  background-color: var(--page);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.about__figure_small {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.about__figure_phone {
+  max-width: 260px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.about__img {
+  display: block;
+  height: auto;
+  margin: 0 auto;
+}
+
+/* скриншот и текст рядом на широком экране, друг под другом — на узком */
+/* колонка текста рядом со скриншотом — тоже контейнер для .controls */
+.about__content {
+  container-type: inline-size;
+}
+
+.about__split {
+  display: grid;
+  gap: 16px 24px;
+  align-items: start;
+}
+
+/* рядом с текстом и последний в карточке — без нижнего отступа */
+.about__figure_side,
+.about__figure:last-child {
+  margin-bottom: 0;
+}
+
+.about__list {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.about__item {
+  position: relative;
+  padding-left: 18px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.about__item::before {
+  content: "";
+  position: absolute;
+  top: 0.62em;
+  left: 2px;
+  width: 6px;
+  height: 6px;
+  background-color: var(--accent);
+  border-radius: 50%;
+}
+
+.about__end {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* оглавление: три группы ссылок-«таблеток» */
+.toc__groups {
+  display: grid;
+  gap: 16px;
+}
+
+.toc__heading {
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.toc__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.toc__link {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color var(--ease);
+}
+
+/* быстрый старт: шаги с номером в золотом кружке */
+.steps {
+  display: grid;
+  gap: 16px;
+  counter-reset: step;
+}
+
+.steps__item {
+  position: relative;
+  padding-left: 44px;
+  counter-increment: step;
+}
+
+.steps__item::before {
+  content: counter(step);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  background-color: var(--accent);
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-ink);
+}
+
+.steps__title {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 30px;
+}
+
+.steps__text {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* кнопки блока: название — слева, что делает — справа (на узком экране друг под другом) */
+.controls {
+  display: grid;
+  gap: 4px 16px;
+  margin-bottom: 12px;
+}
+
+.controls__name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 4px;
+  padding-top: 2px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.controls__desc {
+  margin-bottom: 12px;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+/* две колонки, только если хватает места (карточка во всю ширину, а не колонка рядом со скриншотом) */
+@container (min-width: 620px) {
+  .controls {
+    grid-template-columns: minmax(110px, 180px) minmax(0, 1fr);
+  }
+}
+
+/* название кнопки или переключателя — как в интерфейсе */
+.ui-name {
+  display: inline-block;
+  padding: 0 8px;
+  background-color: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.87em;
+  font-weight: 600;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+/* клавиша компьютерной клавиатуры */
+.ui-key {
+  display: inline-block;
+  min-width: 26px;
+  padding: 0 7px;
+  background-color: var(--surface-2);
+  border: 1px solid var(--line);
+  border-bottom-width: 3px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.87em;
+  font-weight: 700;
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* «Changes» / «Depends on» внизу карточки блока — ссылки на другие блоки */
+.affects {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.affects__label {
+  margin-right: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.affects__link {
+  padding: 4px 12px;
+  border: 1px solid var(--accent-dim);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  transition: background-color var(--ease);
+}
+
+/* схема связей: что выбираешь → что меняется; на узком экране стрелка смотрит вниз */
+.links {
+  display: grid;
+  gap: 14px;
+}
+
+.links__row {
+  display: grid;
+  gap: 8px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.links__row:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.links__from {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: fit-content;
+  padding: 10px 14px;
+  background-color: var(--page);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-sm);
+}
+
+.links__name {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.links__where {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* стрелка: линия и треугольник; на узком экране — вниз */
+.links__arrow {
+  position: relative;
+  width: 2px;
+  height: 18px;
+  margin-left: 22px;
+  background-color: var(--accent-dim);
+}
+
+.links__arrow::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: -5px;
+  border-top: 7px solid var(--accent-dim);
+  border-right: 6px solid transparent;
+  border-left: 6px solid transparent;
+}
+
+.links__to {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.links__target {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 8px 12px;
+  background-color: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.links__link {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: var(--accent-dim);
+  text-underline-offset: 3px;
+}
+
+.links__note {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* цвета подсветки: кружки как ноты на грифе — те же переменные, что в neck.css */
+.palette {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.palette__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px;
+  background-color: var(--page);
+  border-radius: var(--radius-sm);
+}
+
+.palette__pair {
+  flex: none;
+  display: flex;
+  gap: 4px;
+}
+
+.palette__dot {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  background-color: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.palette__dot_root {
+  background-color: var(--root);
+  border-color: var(--root);
+  box-shadow: 0 0 0 2px var(--text);
+  font-weight: 700;
+  color: var(--accent-ink);
+}
+
+.palette__dot_tone {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.palette__dot_key {
+  border: 2px solid var(--accent);
+  color: var(--accent);
+}
+
+.palette__dot_dim {
+  border-color: var(--accent-dim);
+  color: var(--accent-dim);
+}
+
+.palette__dot_out {
+  color: var(--muted);
+}
+
+.palette__dot_open {
+  background-color: transparent;
+  border: 2px solid var(--accent);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.palette__dot_muted {
+  background-color: transparent;
+  border-color: transparent;
+  font-size: 18px;
+  color: var(--text-muted);
+}
+
+.palette__text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.palette__name {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 15px;
+  color: var(--text);
+}
+
+/* нарисованная клавиатура: размер клавиши — от ширины блока (cqw), ряды сдвинуты, как на настоящей */
+.keyboard {
+  --gap: 4px;
+  --key: calc((100cqw - 9 * var(--gap)) / 10);
+
+  container-type: inline-size;
+  display: grid;
+  gap: var(--gap);
+  max-width: 520px;
+  margin-bottom: 10px;
+}
+
+.keyboard__row {
+  display: flex;
+  gap: var(--gap);
+}
+
+.keyboard__row_middle {
+  padding-left: calc(var(--key) * 0.3);
+}
+
+.keyboard__row_bottom {
+  padding-left: calc(var(--key) * 0.8);
+}
+
+.keyboard__key {
+  flex: 0 0 var(--key);
+  height: var(--key);
+  display: grid;
+  place-items: center;
+  background-color: var(--surface-2);
+  border: 1px solid var(--line);
+  border-bottom-width: 3px;
+  border-radius: 6px;
+  font-size: clamp(11px, calc(var(--key) * 0.36), 16px);
+  font-weight: 700;
+}
+
+.keyboard__key_unused {
+  opacity: 0.35;
+}
+
+.keyboard__key_arrow {
+  color: var(--accent);
+}
+
+/* ← прижимаем вправо, → идёт следом */
+.keyboard__key_push {
+  margin-left: auto;
+}
+
+.keyboard__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* таблицы */
+.table-wrap {
+  margin-bottom: 16px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table__caption {
+  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.table__head {
+  padding: 8px 10px 8px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.table__cell {
+  padding: 9px 10px 9px 0;
+  border-bottom: 1px solid var(--line);
+  line-height: 1.45;
+  text-align: left;
+  vertical-align: top;
+}
+
+.table__cell_strong {
+  font-weight: 600;
+}
+
+/* наведение — только там, где есть мышь */
+@media (hover: hover) {
+  .toc__link:hover,
+  .affects__link:hover {
+    background-color: var(--surface-3);
+  }
+
+  .about__link:hover,
+  .links__link:hover {
+    text-decoration-color: currentColor;
+  }
+}
+
+@media (min-width: 600px) {
+  .toc__groups {
+    grid-template-columns: 1fr 2fr 1.6fr;
+  }
+
+  .palette {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* узкий экран: таблица клавиш — карточками, подпись столбца над ячейкой */
+@media (max-width: 599px) {
+  .table_stack,
+  .table_stack .table__tbody,
+  .table_stack .table__row,
+  .table_stack .table__cell {
+    display: block;
+  }
+
+  .table_stack .table__caption {
+    display: block;
+  }
+
+  .table_stack .table__thead {
+    display: none;
+  }
+
+  .table_stack .table__row {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .table_stack .table__cell {
+    padding: 3px 0;
+    border-bottom: none;
+  }
+
+  .table_stack .table__cell[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+  }
+}
+
+@media (min-width: 760px) {
+  .about__split {
+    grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+  }
+
+  /* гриф на телефоне — справа от текста */
+  .about__split_reverse {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 240px);
+  }
+
+  .about__figure_phone {
+    order: 2;
+  }
+
+  /* схема связей в строку: блок → стрелка → что меняется */
+  .links__row {
+    grid-template-columns: 210px 44px minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .links__from {
+    width: auto;
+  }
+
+  .links__arrow {
+    width: auto;
+    height: 2px;
+    margin: 0 8px 0 0;
+  }
+
+  .links__arrow::after {
+    top: -5px;
+    right: -7px;
+    bottom: auto;
+    left: auto;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-left: 7px solid var(--accent-dim);
+    border-right: none;
+  }
+}
+
+@media (max-width: 400px) {
+  .about__title {
+    font-size: 24px;
+  }
+
+  .about__lead {
+    font-size: 17px;
+  }
+
+  .about__figure {
+    padding: 6px;
+  }
+}

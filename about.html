@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#161618">
+    <meta name="description" content="How to use My Guitar Tuning: tuning by ear, keys, chords and shapes on the guitar and bass fretboards, piano and Jam mode.">
+    <title>About · My Guitar Tuning</title>
+    <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="img/favicon.png" sizes="64x64">
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/about.css">
+</head>
+
+<!-- Страница «About»: описание приложения для музыканта. Без JS. Скриншоты — img/about/ (снимаются headless Chrome,
+     см. CLAUDE.md). При изменении функций приложения обновлять и эту страницу. -->
+<body>
+    <header class="header" id="top">
+        <div class="container header__inner">
+            <svg class="header__logo" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2C6.9 2 3.5 3.7 3.5 7.3c0 4.8 5.1 12 7.2 14.1a1.8 1.8 0 0 0 2.6 0c2.1-2.1 7.2-9.3 7.2-14.1C20.5 3.7 17.1 2 12 2z" fill="currentColor"/>
+            </svg>
+            <p class="header__title">My Guitar Tuning</p>
+            <div class="header__actions">
+                <a class="header__link" href="index.html">← Back to app</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="about container">
+        <!-- 1. Что это -->
+        <section class="card about__section" id="what-it-is" aria-labelledby="whatTitle">
+            <h1 class="about__title" id="whatTitle">About My Guitar Tuning</h1>
+            <p class="about__lead">
+                A web app for guitar and bass players. It plays reference notes so you can tune by ear,
+                shows keys and chords on a guitar fretboard, a bass fretboard and a piano, finds chord shapes
+                for your tuning, and has a Jam mode — a pad with only the notes of your key.
+            </p>
+            <p class="about__text">
+                It runs in the browser on a computer or a phone. There is nothing to install and no account.
+            </p>
+            <figure class="about__figure">
+                <img class="about__img" src="img/about/overview.webp" width="960" height="692"
+                    alt="The app in Learn mode: the Tuning block with a guitar headstock in E Standard, the Key block set to A minor pentatonic, and the Chord block set to A minor with the open A shape x02210."
+                    decoding="async">
+            </figure>
+        </section>
+
+        <!-- оглавление -->
+        <nav class="card toc" aria-labelledby="tocTitle">
+            <h2 class="card__title" id="tocTitle">On this page</h2>
+            <div class="toc__groups">
+                <div class="toc__group">
+                    <h3 class="toc__heading">Start</h3>
+                    <ul class="toc__list">
+                        <li><a class="toc__link" href="#what-it-is">What it is</a></li>
+                        <li><a class="toc__link" href="#quick-start">Quick start</a></li>
+                    </ul>
+                </div>
+                <div class="toc__group">
+                    <h3 class="toc__heading">Blocks</h3>
+                    <ul class="toc__list">
+                        <li><a class="toc__link" href="#modes">Learn | Jam</a></li>
+                        <li><a class="toc__link" href="#tuning">Tuning</a></li>
+                        <li><a class="toc__link" href="#key">Key</a></li>
+                        <li><a class="toc__link" href="#chord">Chord</a></li>
+                        <li><a class="toc__link" href="#fretboard">Fretboard</a></li>
+                        <li><a class="toc__link" href="#bass">Bass</a></li>
+                        <li><a class="toc__link" href="#piano">Piano</a></li>
+                        <li><a class="toc__link" href="#jam">Jam</a></li>
+                    </ul>
+                </div>
+                <div class="toc__group">
+                    <h3 class="toc__heading">Reference</h3>
+                    <ul class="toc__list">
+                        <li><a class="toc__link" href="#connections">How the blocks connect</a></li>
+                        <li><a class="toc__link" href="#colors">Highlight colors</a></li>
+                        <li><a class="toc__link" href="#sound">Sound</a></li>
+                        <li><a class="toc__link" href="#keyboard">Keyboard</a></li>
+                        <li><a class="toc__link" href="#limits">Limits and tips</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 2. Быстрый старт -->
+        <section class="card about__section" id="quick-start" aria-labelledby="startTitle">
+            <h2 class="card__title" id="startTitle">Quick start</h2>
+            <ol class="steps">
+                <li class="steps__item">
+                    <h3 class="steps__title">Set the tuning</h3>
+                    <p class="steps__text">
+                        In <a class="about__link" href="#tuning">Tuning</a>, choose <span class="ui-name">Guitar</span>
+                        or <span class="ui-name">Bass</span>. Use <span class="ui-name">−</span> and
+                        <span class="ui-name">+</span> to move the tuning a semitone down or up, and choose
+                        <span class="ui-name">Standard</span> or <span class="ui-name">Drop</span>.
+                        Tap a string button on the headstock to hear it and tune your instrument by ear.
+                    </p>
+                </li>
+                <li class="steps__item">
+                    <h3 class="steps__title">Choose a key</h3>
+                    <p class="steps__text">
+                        In <a class="about__link" href="#key">Key</a>, pick the root note and the scale. Its notes light up
+                        on both fretboards and on the piano.
+                    </p>
+                </li>
+                <li class="steps__item">
+                    <h3 class="steps__title">Choose a chord</h3>
+                    <p class="steps__text">
+                        In <a class="about__link" href="#chord">Chord</a>, pick a chord or tap one under
+                        <span class="ui-name">Chords in key</span>. Switch to <span class="ui-name">Shape</span>
+                        to see one fingering at a time on the guitar fretboard.
+                    </p>
+                </li>
+                <li class="steps__item">
+                    <h3 class="steps__title">Play</h3>
+                    <p class="steps__text">
+                        Tap notes on the fretboards, piano keys or note circles, or press
+                        <span class="ui-name">Play scale</span> and <span class="ui-name">Play chord</span>.
+                    </p>
+                </li>
+                <li class="steps__item">
+                    <h3 class="steps__title">Jam</h3>
+                    <p class="steps__text">
+                        Switch the header to <span class="ui-name">Jam</span> and play the notes of the key on the pad —
+                        with the mouse, your fingers or the computer keyboard.
+                    </p>
+                </li>
+            </ol>
+        </section>
+
+        <!-- 3. Блоки -->
+        <section class="card about__section" id="modes" aria-labelledby="modesTitle">
+            <h2 class="card__title" id="modesTitle">Learn | Jam</h2>
+            <figure class="about__figure about__figure_small">
+                    <img class="about__img" src="img/about/header.webp" width="221" height="57"
+                        alt="The right side of the header: the Learn | Jam switch with Jam selected, and the About link."
+                        loading="lazy" decoding="async">
+            </figure>
+            <div class="about__content">
+                    <p class="about__text">The switch in the top right corner of the app chooses what you see.</p>
+                    <dl class="controls">
+                        <dt class="controls__name"><span class="ui-name">Learn</span></dt>
+                        <dd class="controls__desc">All blocks: Tuning, Key, Chord, Fretboard, Bass and Piano.
+                            The app always opens in Learn.</dd>
+                        <dt class="controls__name"><span class="ui-name">Jam</span></dt>
+                        <dd class="controls__desc">Hides Tuning and Chord and shows the Jam pad next to Key.
+                            The fretboards and the piano stay.</dd>
+                        <dt class="controls__name"><span class="ui-name">About</span></dt>
+                        <dd class="controls__desc">Opens this page.</dd>
+                    </dl>
+                    <p class="about__text about__text_muted">Switching modes stops anything that is playing.</p>
+            </div>
+            <p class="affects">
+                <span class="affects__label">Changes</span>
+                <a class="affects__link" href="#tuning">Tuning</a>
+                <a class="affects__link" href="#chord">Chord</a>
+                <a class="affects__link" href="#jam">Jam</a>
+            </p>
+        </section>
+
+        <section class="card about__section" id="tuning" aria-labelledby="tuningTitle">
+            <h2 class="card__title" id="tuningTitle">Tuning</h2>
+            <div class="about__split">
+                <figure class="about__figure about__figure_side">
+                    <img class="about__img" src="img/about/tuning.webp" width="456" height="636"
+                        alt="Tuning block: a guitar headstock with string buttons D, A, E on the left and G, B, E on the right, the tuning name E Standard with E A D G B E below it, the − and + buttons, and the Standard | Drop switch."
+                        loading="lazy" decoding="async">
+                </figure>
+                <div class="about__content">
+                    <p class="about__text">
+                        Reference notes for tuning by ear. One tuning is shared by the guitar and the bass, like in a band:
+                        guitar D Standard goes with bass D Standard.
+                    </p>
+                    <dl class="controls">
+                        <dt class="controls__name"><span class="ui-name">Guitar</span> <span class="ui-name">Bass</span></dt>
+                        <dd class="controls__desc">Which headstock is shown: the guitar with 6 strings or the bass with
+                            4 or 5 strings (set in <a class="about__link" href="#bass">Bass</a>). It also chooses the instrument
+                            that sounds for the string buttons, <span class="ui-name">Play all</span>, the note circles in Key and Chord,
+                            <span class="ui-name">Play scale</span>, <span class="ui-name">Play chord</span>, Chords in key and the
+                            piano keys. The fretboards and the tuning stay the same.</dd>
+                        <dt class="controls__name">String buttons</dt>
+                        <dd class="controls__desc">The open note of each string, with the string number in the corner.
+                            Thick strings are on the left, thin ones on the right. Tap a button to hear the string.</dd>
+                        <dt class="controls__name"><span class="ui-name">−</span> <span class="ui-name">+</span></dt>
+                        <dd class="controls__desc">Tune all strings a semitone down or up. The name shows the note of the
+                            thickest string (E Standard, D♯ Standard, D Standard…), and the line below lists the open strings
+                            from the thickest. You can go 5 semitones above E Standard and 6 below; one more step jumps to the
+                            other end.</dd>
+                        <dt class="controls__name"><span class="ui-name">Standard</span> <span class="ui-name">Drop</span></dt>
+                        <dd class="controls__desc">Drop keeps the thickest string on the note in the name and tunes the other
+                            strings a whole step higher, so the thickest string sits a whole step lower than usual.
+                            For Drop D, press <span class="ui-name">−</span> twice (D Standard), then
+                            <span class="ui-name">Drop</span>: D A D G B E.</dd>
+                        <dt class="controls__name"><span class="ui-name">Play all</span></dt>
+                        <dd class="controls__desc">Plays the open strings one by one, from the thickest.</dd>
+                        <dt class="controls__name"><span class="ui-name">Repeat</span></dt>
+                        <dd class="controls__desc">When it is on, a tapped string repeats every 2.5 seconds, so both your hands
+                            are free for the tuning pegs. Tap the same string again to stop, or another string to switch.</dd>
+                        <dt class="controls__name">Line at the bottom</dt>
+                        <dd class="controls__desc">Shows the string you hear, its note and frequency, for example
+                            “String 6 · E2 · 82.41 Hz”.</dd>
+                    </dl>
+                    <p class="about__text about__text_muted">
+                        With the same tuning, the bass is tuned like the four thickest guitar strings, an octave lower:
+                        E Standard is E A D G, Drop D is D A D G. A 5-string bass adds a low string a fourth below:
+                        B E A D G, and the name follows it — guitar D Standard is A Standard on a 5-string bass.
+                        Note names on the headstock always use sharps.
+                    </p>
+                </div>
+            </div>
+            <p class="affects">
+                <span class="affects__label">Changes</span>
+                <a class="affects__link" href="#fretboard">Fretboard</a>
+                <a class="affects__link" href="#bass">Bass</a>
+                <a class="affects__link" href="#chord">Chord shapes</a>
+                <a class="affects__link" href="#sound">Sound of Key, Chord and Piano</a>
+            </p>
+        </section>
+
+        <section class="card about__section" id="key" aria-labelledby="keyTitle">
+            <h2 class="card__title" id="keyTitle">Key</h2>
+            <div class="about__split">
+                <figure class="about__figure about__figure_side">
+                    <img class="about__img" src="img/about/key.webp" width="456" height="174"
+                        alt="Key block: root A and scale Minor pentatonic, with the note circles A, C, D, E, G; A is red."
+                        loading="lazy" decoding="async">
+                </figure>
+                <div class="about__content">
+                    <dl class="controls">
+                        <dt class="controls__name">Root list</dt>
+                        <dd class="controls__desc"><span class="ui-name">Off</span> or one of the 12 notes
+                            (C, C♯ / D♭, D…). Off turns the key highlight off.</dd>
+                        <dt class="controls__name">Scale list</dt>
+                        <dd class="controls__desc">11 scales in three groups.
+                            Major &amp; minor: Major (Ionian), Minor (Aeolian), Harmonic minor.
+                            Pentatonic &amp; blues: Major pentatonic, Minor pentatonic, Blues.
+                            Modes: Dorian, Phrygian, Lydian, Mixolydian, Locrian.</dd>
+                        <dt class="controls__name">Note circles</dt>
+                        <dd class="controls__desc">The notes of the scale; the root is red. Tap a circle to hear the note.</dd>
+                        <dt class="controls__name"><span class="ui-name">Play scale</span></dt>
+                        <dd class="controls__desc">Plays the scale up to the octave. Each note lights up on the circles,
+                            both fretboards and the piano as it plays.</dd>
+                    </dl>
+                    <p class="about__text about__text_muted">
+                        Notes are named the way the key writes them: F major has B♭, D minor has B♭,
+                        A harmonic minor has G♯. Without a key, notes are named with sharps.
+                    </p>
+                </div>
+            </div>
+            <p class="affects">
+                <span class="affects__label">Changes</span>
+                <a class="affects__link" href="#fretboard">Fretboard</a>
+                <a class="affects__link" href="#bass">Bass</a>
+                <a class="affects__link" href="#piano">Piano</a>
+                <a class="affects__link" href="#chord">Chords in key</a>
+                <a class="affects__link" href="#jam">Jam pad</a>
+                <a class="affects__link" href="#key">Note names (♯ or ♭)</a>
+            </p>
+        </section>
+
+        <section class="card about__section" id="chord" aria-labelledby="chordTitle">
+            <h2 class="card__title" id="chordTitle">Chord</h2>
+            <div class="about__split">
+                <figure class="about__figure about__figure_side">
+                    <img class="about__img" src="img/about/chord.webp" width="456" height="447"
+                        alt="Chord block: A minor with the notes A, C, E and degrees R, ♭3, 5; Shape selected, showing “A shape · open” and x02210, position 1 of 6; below, Chords in A Minor (parent key) with Triads selected: Am, Bdim, C, Dm, Em, F, G."
+                        loading="lazy" decoding="async">
+                </figure>
+                <div class="about__content">
+                    <dl class="controls">
+                        <dt class="controls__name">Root and type lists</dt>
+                        <dd class="controls__desc">The root (<span class="ui-name">Off</span> or one of 12 notes) and one of
+                            13 chord types: Major, Minor (m), Dominant 7 (7), Major 7 (maj7), Minor 7 (m7), Minor-major 7
+                            (m(maj7)), Diminished (dim), Half-dim (m7♭5), Diminished 7 (dim7), Augmented (aug),
+                            Augmented major 7 (maj7♯5), Sus2, Sus4.</dd>
+                        <dt class="controls__name">Note circles</dt>
+                        <dd class="controls__desc">The chord notes with their degrees (R, 3, ♭3, 5, ♭7…). Tap to hear a note.</dd>
+                        <dt class="controls__name"><span class="ui-name">Play chord</span></dt>
+                        <dd class="controls__desc">On the guitar, strums the selected shape. On the bass, plays the chord as
+                            an arpeggio from low to high — low notes together sound muddy.</dd>
+                        <dt class="controls__name"><span class="ui-name">All notes</span> <span class="ui-name">Shape</span></dt>
+                        <dd class="controls__desc">What the guitar fretboard shows: every note of the chord, or one playable
+                            shape.</dd>
+                        <dt class="controls__name"><span class="ui-name">‹</span> <span class="ui-name">›</span></dt>
+                        <dd class="controls__desc">In Shape view, step through the shapes and hear each one. The name tells
+                            where the shape is (“A shape · open”, “E shape · barre, fret 5”; in tunings other than Standard
+                            it names the string of the lowest note, like “Bass on 6th string”), then the shape from the
+                            thickest string (x02210) and its number (1 / 6).</dd>
+                        <dt class="controls__name"><span class="ui-name">Chords in key</span></dt>
+                        <dd class="controls__desc">When a key is chosen: its chords with Roman numerals. Tap a chord to choose
+                            and hear it, tap it again to turn it off. Pentatonics show the chords of the parent key
+                            (A minor pentatonic → A minor); Blues shows I, IV and V.</dd>
+                        <dt class="controls__name"><span class="ui-name">Triads</span> <span class="ui-name">7th</span></dt>
+                        <dd class="controls__desc">Three-note chords or seventh chords in the list.</dd>
+                        <dt class="controls__name"><span class="ui-name">Play all</span></dt>
+                        <dd class="controls__desc">Plays every chord of the key in turn and comes back to the first one,
+                            showing each chord on the fretboards.</dd>
+                    </dl>
+                </div>
+            </div>
+            <p class="affects">
+                <span class="affects__label">Changes</span>
+                <a class="affects__link" href="#fretboard">Fretboard (and shapes)</a>
+                <a class="affects__link" href="#bass">Bass</a>
+                <a class="affects__link" href="#piano">Piano</a>
+            </p>
+        </section>
+
+        <section class="card about__section" id="fretboard" aria-labelledby="fretboardTitle">
+            <h2 class="card__title" id="fretboardTitle">Fretboard</h2>
+            <figure class="about__figure">
+                <img class="about__img" src="img/about/fretboard.webp" width="928" height="340"
+                    alt="Guitar fretboard in E Standard, frets 1 to 12, in Shape view: the open A minor shape is filled in, with a red A on the 3rd string; other A minor notes are faded; the open 5th and 1st strings have rings and the 6th string has an ×. The legend reads Chord root, In shape, Chord tone, Other."
+                    loading="lazy" decoding="async">
+            </figure>
+            <div class="about__split about__split_reverse">
+                <figure class="about__figure about__figure_side about__figure_phone">
+                    <img class="about__img" src="img/about/fretboard-phone.webp" width="343" height="708"
+                        alt="The same fretboard on a phone: the neck is vertical, frets go down and the thickest string is on the left."
+                        loading="lazy" decoding="async">
+                </figure>
+                <div class="about__content">
+                    <ul class="about__list">
+                        <li class="about__item">A 6-string guitar neck with the open strings and frets 1–12. Fret numbers are on top,
+                            the open string notes on the left; the thinnest string is at the top.</li>
+                        <li class="about__item">Tap any note to hear it on the guitar, at its real pitch.</li>
+                        <li class="about__item">Notes are colored by the key and the chord; the legend in the top right explains
+                            the colors and changes with what you choose. See <a class="about__link" href="#colors">Highlight colors</a>.</li>
+                        <li class="about__item">Chord shapes are shown only here. In Shape view, an open string that is played has
+                            a ring, and a string that is not played has an ×.</li>
+                        <li class="about__item">On a phone the neck turns vertical, like a chord chart: frets go down and the
+                            thickest string is on the left.</li>
+                    </ul>
+                </div>
+            </div>
+            <p class="affects">
+                <span class="affects__label">Depends on</span>
+                <a class="affects__link" href="#tuning">Tuning</a>
+                <a class="affects__link" href="#key">Key</a>
+                <a class="affects__link" href="#chord">Chord</a>
+            </p>
+        </section>
+
+        <section class="card about__section" id="bass" aria-labelledby="bassTitle">
+            <h2 class="card__title" id="bassTitle">Bass</h2>
+            <figure class="about__figure">
+                <img class="about__img" src="img/about/bass.webp" width="928" height="277"
+                    alt="Bass fretboard with 4 strings E A D G: A minor chord notes filled in, with red A notes; D and G from the key have gold rings. Above it, the 4 strings | 5 strings switch and the Hide button."
+                    loading="lazy" decoding="async">
+            </figure>
+            <dl class="controls">
+                <dt class="controls__name"><span class="ui-name">4 strings</span> <span class="ui-name">5 strings</span></dt>
+                <dd class="controls__desc">A 4-string bass (E A D G in E Standard) or a 5-string bass with a low B.
+                    This also sets the bass headstock in Tuning.</dd>
+                <dt class="controls__name"><span class="ui-name">Hide</span> <span class="ui-name">Show</span></dt>
+                <dd class="controls__desc">Folds the bass fretboard away or brings it back.</dd>
+                <dt class="controls__name">Notes</dt>
+                <dd class="controls__desc">Tap a note to hear it on the bass, an octave below the guitar. The tuning is the
+                    same as the guitar’s, and so are the colors. With a chord chosen, all its notes are shown — there are
+                    no shapes on the bass.</dd>
+            </dl>
+            <p class="about__text about__text_muted">The string count and Hide / Show are remembered.</p>
+            <p class="affects">
+                <span class="affects__label">Depends on</span>
+                <a class="affects__link" href="#tuning">Tuning</a>
+                <a class="affects__link" href="#key">Key</a>
+                <a class="affects__link" href="#chord">Chord</a>
+            </p>
+        </section>
+
+        <section class="card about__section" id="piano" aria-labelledby="pianoTitle">
+            <h2 class="card__title" id="pianoTitle">Piano</h2>
+            <figure class="about__figure">
+                <img class="about__img" src="img/about/piano.webp" width="928" height="224"
+                    alt="Piano from C3 to C5: A keys red, C and E gold, D and G with a gold frame."
+                    loading="lazy" decoding="async">
+            </figure>
+            <ul class="about__list">
+                <li class="about__item">Two octaves, C3 to C5. On a phone, one octave: C4 to C5.</li>
+                <li class="about__item">The same colors as the fretboards, and note names that follow the key.</li>
+                <li class="about__item">Tap a key to hear it — with the guitar sound, or the bass sound when
+                    <span class="ui-name">Bass</span> is chosen in Tuning.</li>
+                <li class="about__item">When a note plays anywhere in the app, its key flashes (in the nearest octave you can see).</li>
+            </ul>
+            <p class="affects">
+                <span class="affects__label">Depends on</span>
+                <a class="affects__link" href="#key">Key</a>
+                <a class="affects__link" href="#chord">Chord</a>
+                <a class="affects__link" href="#tuning">Tuning (sound only)</a>
+            </p>
+        </section>
+
+        <section class="card about__section" id="jam" aria-labelledby="jamTitle">
+            <h2 class="card__title" id="jamTitle">Jam</h2>
+            <figure class="about__figure">
+                <img class="about__img" src="img/about/jam.webp" width="928" height="354"
+                    alt="Jam mode: the Key block with A minor pentatonic next to the Jam pad. The pad has three rows of A, C, D, E, G; the A buttons are red. Each button shows the note, its degree and a keyboard key. The header of the pad has Guitar | Bass | Piano, the − and + buttons and Octaves 3–5."
+                    loading="lazy" decoding="async">
+            </figure>
+            <p class="about__text">
+                Only in Jam mode. The pad holds only the notes of the key chosen in Key, so every note fits.
+                Three rows are three octaves — the top row is the highest. In each row the notes go up from the root;
+                root buttons are red. Each button shows the note, its number in the scale and its keyboard key.
+                Without a key, the pad shows the hint “Choose a key above — its notes will appear here”.
+            </p>
+            <dl class="controls">
+                <dt class="controls__name"><span class="ui-name">Guitar</span> <span class="ui-name">Bass</span> <span class="ui-name">Piano</span></dt>
+                <dd class="controls__desc">The sound of the pad. Guitar and Bass ring out like a plucked string.
+                    Piano sounds while you hold the button and fades when you let go. This changes only the pad,
+                    not the tuning or the fretboards.</dd>
+                <dt class="controls__name"><span class="ui-name">−</span> <span class="ui-name">+</span></dt>
+                <dd class="controls__desc">Move the pad an octave down or up; the label shows the octaves of the rows,
+                    for example <span class="ui-name">Octaves 3–5</span>. Each sound has its own range (see the table).</dd>
+                <dt class="controls__name">Pad buttons</dt>
+                <dd class="controls__desc">Click, tap with several fingers at once, or slide a finger across the buttons to
+                    play each one. Playing the pad doesn’t scroll the page. You can also use the
+                    <a class="about__link" href="#keyboard">computer keyboard</a>.</dd>
+            </dl>
+            <div class="table-wrap">
+                <table class="table">
+                    <caption class="table__caption">Octaves of the pad</caption>
+                    <thead>
+                        <tr><th class="table__head" scope="col">Sound</th><th class="table__head" scope="col">Starts at</th><th class="table__head" scope="col">Can move from … to</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><th class="table__cell table__cell_strong" scope="row">Guitar</th><td class="table__cell">Octaves 3–5</td><td class="table__cell">2–4 … 4–6</td></tr>
+                        <tr><th class="table__cell table__cell_strong" scope="row">Bass</th><td class="table__cell">Octaves 1–3</td><td class="table__cell">0–2 … 2–4</td></tr>
+                        <tr><th class="table__cell table__cell_strong" scope="row">Piano</th><td class="table__cell">Octaves 3–5</td><td class="table__cell">1–3 … 5–7</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <ul class="about__list">
+                <li class="about__item">A pressed button lights up, and the same note flashes on the guitar fretboard,
+                    the bass fretboard and the piano.</li>
+                <li class="about__item">Playing the pad stops <span class="ui-name">Play scale</span> and
+                    <span class="ui-name">Play all</span>.</li>
+                <li class="about__item">The sound and the octaves are remembered.</li>
+            </ul>
+            <p class="affects">
+                <span class="affects__label">Depends on</span>
+                <a class="affects__link" href="#key">Key</a>
+                <a class="affects__link" href="#modes">Learn | Jam</a>
+            </p>
+        </section>
+
+        <!-- 4. Схема связей -->
+        <section class="card about__section" id="connections" aria-labelledby="connectionsTitle">
+            <h2 class="card__title" id="connectionsTitle">How the blocks connect</h2>
+            <p class="about__text">What you choose on the left changes the blocks on the right.</p>
+            <ol class="links">
+                <li class="links__row">
+                    <div class="links__from"><span class="links__name">Learn | Jam</span><span class="links__where">header</span></div>
+                    <span class="links__arrow" aria-hidden="true"></span>
+                    <ul class="links__to">
+                        <li class="links__target"><a class="links__link" href="#tuning">Tuning</a><span class="links__note">hidden in Jam</span></li>
+                        <li class="links__target"><a class="links__link" href="#chord">Chord</a><span class="links__note">hidden in Jam</span></li>
+                        <li class="links__target"><a class="links__link" href="#jam">Jam</a><span class="links__note">shown in Jam</span></li>
+                    </ul>
+                </li>
+                <li class="links__row">
+                    <div class="links__from"><span class="links__name">−&nbsp;+ · Standard | Drop</span><span class="links__where">Tuning</span></div>
+                    <span class="links__arrow" aria-hidden="true"></span>
+                    <ul class="links__to">
+                        <li class="links__target"><a class="links__link" href="#fretboard">Fretboard</a><span class="links__note">notes on every fret</span></li>
+                        <li class="links__target"><a class="links__link" href="#bass">Bass</a><span class="links__note">notes on every fret</span></li>
+                        <li class="links__target"><a class="links__link" href="#chord">Chord</a><span class="links__note">shapes for the new tuning</span></li>
+                    </ul>
+                </li>
+                <li class="links__row">
+                    <div class="links__from"><span class="links__name">Guitar | Bass</span><span class="links__where">Tuning</span></div>
+                    <span class="links__arrow" aria-hidden="true"></span>
+                    <ul class="links__to">
+                        <li class="links__target"><a class="links__link" href="#tuning">Tuning</a><span class="links__note">headstock, string sounds</span></li>
+                        <li class="links__target"><a class="links__link" href="#key">Key</a><span class="links__note">sound of circles, Play scale</span></li>
+                        <li class="links__target"><a class="links__link" href="#chord">Chord</a><span class="links__note">sound of circles and chords</span></li>
+                        <li class="links__target"><a class="links__link" href="#piano">Piano</a><span class="links__note">sound of the keys</span></li>
+                    </ul>
+                </li>
+                <li class="links__row">
+                    <div class="links__from"><span class="links__name">Key</span><span class="links__where">root and scale</span></div>
+                    <span class="links__arrow" aria-hidden="true"></span>
+                    <ul class="links__to">
+                        <li class="links__target"><a class="links__link" href="#fretboard">Fretboard</a><span class="links__note">highlight, note names</span></li>
+                        <li class="links__target"><a class="links__link" href="#bass">Bass</a><span class="links__note">highlight, note names</span></li>
+                        <li class="links__target"><a class="links__link" href="#piano">Piano</a><span class="links__note">highlight, note names</span></li>
+                        <li class="links__target"><a class="links__link" href="#chord">Chord</a><span class="links__note">Chords in key</span></li>
+                        <li class="links__target"><a class="links__link" href="#jam">Jam</a><span class="links__note">notes on the pad</span></li>
+                    </ul>
+                </li>
+                <li class="links__row">
+                    <div class="links__from"><span class="links__name">Chord</span><span class="links__where">root, type, shape</span></div>
+                    <span class="links__arrow" aria-hidden="true"></span>
+                    <ul class="links__to">
+                        <li class="links__target"><a class="links__link" href="#fretboard">Fretboard</a><span class="links__note">chord notes or shape</span></li>
+                        <li class="links__target"><a class="links__link" href="#bass">Bass</a><span class="links__note">chord notes</span></li>
+                        <li class="links__target"><a class="links__link" href="#piano">Piano</a><span class="links__note">chord notes</span></li>
+                    </ul>
+                </li>
+                <li class="links__row">
+                    <div class="links__from"><span class="links__name">4 strings | 5 strings</span><span class="links__where">Bass</span></div>
+                    <span class="links__arrow" aria-hidden="true"></span>
+                    <ul class="links__to">
+                        <li class="links__target"><a class="links__link" href="#bass">Bass</a><span class="links__note">number of strings</span></li>
+                        <li class="links__target"><a class="links__link" href="#tuning">Tuning</a><span class="links__note">bass headstock</span></li>
+                    </ul>
+                </li>
+                <li class="links__row">
+                    <div class="links__from"><span class="links__name">Guitar | Bass | Piano · −&nbsp;+</span><span class="links__where">Jam</span></div>
+                    <span class="links__arrow" aria-hidden="true"></span>
+                    <ul class="links__to">
+                        <li class="links__target"><a class="links__link" href="#jam">Jam</a><span class="links__note">only the pad’s sound and octaves</span></li>
+                    </ul>
+                </li>
+            </ol>
+        </section>
+
+        <!-- 5. Цвета -->
+        <section class="card about__section" id="colors" aria-labelledby="colorsTitle">
+            <h2 class="card__title" id="colorsTitle">Highlight colors</h2>
+            <p class="about__text">
+                The fretboards, the piano and the note circles use the same colors. The words in quotes are the
+                legend above the guitar fretboard; it changes with what you choose.
+            </p>
+            <ul class="palette">
+                <li class="palette__item">
+                    <span class="palette__dot palette__dot_root" aria-hidden="true">A</span>
+                    <p class="palette__text"><b class="palette__name">“Root” / “Chord root”</b>
+                        The root of the key, or the root of the chord when a chord is chosen. The white ring lets you
+                        find it even if red and gold look alike to you.</p>
+                </li>
+                <li class="palette__item">
+                    <span class="palette__dot palette__dot_tone" aria-hidden="true">C</span>
+                    <p class="palette__text"><b class="palette__name">“In key” / “Chord tone” / “In shape”</b>
+                        The notes of the key when no chord is chosen, the notes of the chord when one is, and the notes of
+                        the shown shape in Shape view.</p>
+                </li>
+                <li class="palette__item">
+                    <span class="palette__dot palette__dot_key" aria-hidden="true">D</span>
+                    <p class="palette__text"><b class="palette__name">“In key” (gold ring)</b>
+                        When both a key and a chord are chosen: notes of the key that are not in the chord. Not drawn on
+                        the guitar fretboard or the piano in Shape view.</p>
+                </li>
+                <li class="palette__item">
+                    <span class="palette__dot palette__dot_dim" aria-hidden="true">E</span>
+                    <p class="palette__text"><b class="palette__name">“Chord tone” (faded, Shape view)</b>
+                        Notes of the chord that are not in the shown shape — still visible, but the shape stands out.</p>
+                </li>
+                <li class="palette__item">
+                    <span class="palette__dot palette__dot_out" aria-hidden="true">F</span>
+                    <p class="palette__text"><b class="palette__name">“Other”</b>
+                        Notes outside the key and the chord.</p>
+                </li>
+                <li class="palette__item">
+                    <span class="palette__pair" aria-hidden="true">
+                        <span class="palette__dot palette__dot_open">E</span>
+                        <span class="palette__dot palette__dot_muted">×</span>
+                    </span>
+                    <p class="palette__text"><b class="palette__name">Open strings in Shape view</b>
+                        A ring means the open string is played; × means the string is not played.</p>
+                </li>
+            </ul>
+            <p class="about__text about__text_muted">With no key and no chord chosen, nothing is highlighted.</p>
+        </section>
+
+        <!-- 6. Звук -->
+        <section class="card about__section" id="sound" aria-labelledby="soundTitle">
+            <h2 class="card__title" id="soundTitle">Sound</h2>
+            <ul class="about__list">
+                <li class="about__item"><b>Exact pitch.</b> Every note is tuned to A = 440 Hz with an error of a small fraction
+                    of a cent, so the open strings in Tuning work as a reference: play a string in the app (or turn on
+                    <span class="ui-name">Repeat</span>), play the same string on your instrument and tune until they match.</li>
+                <li class="about__item"><b>Bass is an octave lower.</b> The bass sounds an octave below the guitar: the low E of
+                    a bass is E1 (41.20 Hz), of a guitar E2 (82.41 Hz); the low B of a 5-string bass is B0 (30.87 Hz).
+                    Note circles, Play scale and Play chord also go an octave lower when Bass is chosen in Tuning.</li>
+                <li class="about__item"><b>Sound starts after your first tap.</b> Browsers don’t let a page play sound before you
+                    click or tap something, so the first sound comes with your first tap.</li>
+                <li class="about__item"><b>Small speakers.</b> Laptop and phone speakers barely play the lowest bass notes
+                    (30–60 Hz). You will mostly hear their overtones; the pitch is still right. Headphones or bigger
+                    speakers let you hear them fully.</li>
+                <li class="about__item"><b>No recordings.</b> All sounds are made in the browser: the guitar and the bass are a
+                    model of a plucked string, the Jam piano is built from harmonics.</li>
+            </ul>
+            <div class="table-wrap">
+                <table class="table">
+                    <caption class="table__caption">Which instrument you hear</caption>
+                    <thead>
+                        <tr><th class="table__head" scope="col">What you play</th><th class="table__head" scope="col">Sound</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="table__cell">String buttons, Play all, note circles, Play scale, Play chord, Chords in key, piano keys</td>
+                            <td class="table__cell">The instrument chosen in Tuning: <span class="ui-name">Guitar</span> or <span class="ui-name">Bass</span></td></tr>
+                        <tr><td class="table__cell">Notes on the Fretboard</td><td class="table__cell">Guitar</td></tr>
+                        <tr><td class="table__cell">Notes on the Bass fretboard</td><td class="table__cell">Bass</td></tr>
+                        <tr><td class="table__cell">Jam pad</td><td class="table__cell">The Jam switch: Guitar, Bass or Piano</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 7. Клавиатура -->
+        <section class="card about__section" id="keyboard" aria-labelledby="keyboardTitle">
+            <h2 class="card__title" id="keyboardTitle">Keyboard</h2>
+            <p class="about__text">In Jam mode, three rows of letter keys play the three rows of the pad, note by note from the left.</p>
+            <div class="keyboard" role="img"
+                aria-label="Keyboard layout for Jam mode: letters Q to O play the top row of the pad, A to L the middle row, Z to M the bottom row; the left and right arrow keys move the pad an octave down and up.">
+                <div class="keyboard__row keyboard__row_top">
+                    <span class="keyboard__key">Q</span><span class="keyboard__key">W</span><span class="keyboard__key">E</span><span class="keyboard__key">R</span><span class="keyboard__key">T</span><span class="keyboard__key">Y</span><span class="keyboard__key">U</span><span class="keyboard__key">I</span><span class="keyboard__key">O</span><span class="keyboard__key keyboard__key_unused">P</span>
+                </div>
+                <div class="keyboard__row keyboard__row_middle">
+                    <span class="keyboard__key">A</span><span class="keyboard__key">S</span><span class="keyboard__key">D</span><span class="keyboard__key">F</span><span class="keyboard__key">G</span><span class="keyboard__key">H</span><span class="keyboard__key">J</span><span class="keyboard__key">K</span><span class="keyboard__key">L</span>
+                </div>
+                <div class="keyboard__row keyboard__row_bottom">
+                    <span class="keyboard__key">Z</span><span class="keyboard__key">X</span><span class="keyboard__key">C</span><span class="keyboard__key">V</span><span class="keyboard__key">B</span><span class="keyboard__key">N</span><span class="keyboard__key">M</span>
+                    <span class="keyboard__key keyboard__key_arrow keyboard__key_push">←</span><span class="keyboard__key keyboard__key_arrow">→</span>
+                </div>
+            </div>
+            <ul class="keyboard__legend">
+                <li class="keyboard__label keyboard__label_top">Q … O — top row of the pad</li>
+                <li class="keyboard__label keyboard__label_middle">A … L — middle row</li>
+                <li class="keyboard__label keyboard__label_bottom">Z … M — bottom row</li>
+                <li class="keyboard__label keyboard__label_arrow">← → — octave down / up</li>
+            </ul>
+            <p class="about__text">
+                A row of the pad can be shorter than a row of keys. Then the extra keys go on into the next row up
+                of the pad, and keys past the top row do nothing:
+            </p>
+            <div class="table-wrap">
+                <table class="table table_stack">
+                    <caption class="table__caption">Which key plays which pad button (row, note number)</caption>
+                    <thead class="table__thead">
+                        <tr class="table__row">
+                            <th class="table__head" scope="col">Scale</th>
+                            <th class="table__head" scope="col">Z X C V B N M</th>
+                            <th class="table__head" scope="col">A S D F G H J K L</th>
+                            <th class="table__head" scope="col">Q W E R T Y U I O</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table__tbody">
+                        <tr class="table__row">
+                            <th class="table__cell table__cell_strong" scope="row">7 notes: Major, Minor, Harmonic minor, modes</th>
+                            <td class="table__cell" data-label="Z X C V B N M">Z–M: bottom 1–7</td>
+                            <td class="table__cell" data-label="A S D F G H J K L">A–J: middle 1–7<br>K L: top 1–2</td>
+                            <td class="table__cell" data-label="Q W E R T Y U I O">Q–U: top 1–7<br>I O: nothing</td>
+                        </tr>
+                        <tr class="table__row">
+                            <th class="table__cell table__cell_strong" scope="row">6 notes: Blues</th>
+                            <td class="table__cell" data-label="Z X C V B N M">Z–N: bottom 1–6<br>M: middle 1</td>
+                            <td class="table__cell" data-label="A S D F G H J K L">A–H: middle 1–6<br>J K L: top 1–3</td>
+                            <td class="table__cell" data-label="Q W E R T Y U I O">Q–Y: top 1–6<br>U I O: nothing</td>
+                        </tr>
+                        <tr class="table__row">
+                            <th class="table__cell table__cell_strong" scope="row">5 notes: Major and Minor pentatonic</th>
+                            <td class="table__cell" data-label="Z X C V B N M">Z–B: bottom 1–5<br>N M: middle 1–2</td>
+                            <td class="table__cell" data-label="A S D F G H J K L">A–G: middle 1–5<br>H J K L: top 1–4</td>
+                            <td class="table__cell" data-label="Q W E R T Y U I O">Q–T: top 1–5<br>Y U I O: nothing</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <ul class="about__list">
+                <li class="about__item">The letter is printed on each pad button (not on touch screens).</li>
+                <li class="about__item">The keys work only in Jam mode, not while a list is open or selected, and not together
+                    with Ctrl, Cmd or Alt.</li>
+                <li class="about__item">Holding a key doesn’t repeat the note. With the Piano sound, the note lasts while you
+                    hold the key.</li>
+                <li class="about__item">The keys go by their place on the keyboard, not by the letter, so they work with any
+                    keyboard layout.</li>
+            </ul>
+            <div class="table-wrap">
+                <table class="table">
+                    <caption class="table__caption">Other keys</caption>
+                    <thead>
+                        <tr><th class="table__head" scope="col">Key</th><th class="table__head" scope="col">What it does</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="table__cell"><kbd class="ui-key">←</kbd> <kbd class="ui-key">→</kbd></td><td class="table__cell">Jam mode: move the pad an octave down or up</td></tr>
+                        <tr><td class="table__cell"><kbd class="ui-key">Tab</kbd></td><td class="table__cell">Move between buttons and lists</td></tr>
+                        <tr><td class="table__cell"><kbd class="ui-key">Enter</kbd> <kbd class="ui-key">Space</kbd></td><td class="table__cell">Press the selected button. String buttons, note circles, fretboard notes, piano keys and pad buttons play their note</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 8. Ограничения и советы -->
+        <section class="card about__section" id="limits" aria-labelledby="limitsTitle">
+            <h2 class="card__title" id="limitsTitle">Limits and tips</h2>
+            <h3 class="about__subtitle">What the app can’t do yet</h3>
+            <ul class="about__list">
+                <li class="about__item">The fretboards show the open strings and frets 1–12 only, and chord shapes are found
+                    only up to the 12th fret.</li>
+                <li class="about__item">Chord shapes are for the guitar only. The lowest note of a shape is always the root
+                    (no inversions), a shape spans at most 4 frets, and up to 8 shapes are shown per chord.</li>
+                <li class="about__item">Tunings: only Standard and Drop, moved by semitones, and one tuning for both the
+                    guitar and the bass. There are no other tunings and no way to tune single strings.</li>
+                <li class="about__item">A 6-string guitar and a 4- or 5-string bass only.</li>
+                <li class="about__item">No microphone tuner: the app plays reference notes and you tune by ear.</li>
+                <li class="about__item">The piano has two octaves (one on a phone).</li>
+                <li class="about__item">Jam has no recording and no metronome.</li>
+                <li class="about__item">The key, the chord, the tuning and Learn | Jam are not saved: every visit starts in
+                    Learn, E Standard, with no key and no chord.</li>
+            </ul>
+            <h3 class="about__subtitle">Where your settings are kept</h3>
+            <p class="about__text">
+                The app remembers a few choices in your browser’s local storage: <span class="ui-name">Guitar</span> or
+                <span class="ui-name">Bass</span> in Tuning, the bass string count, whether the Bass fretboard is hidden,
+                and the Jam sound and octaves. They stay in this browser on this device and are not sent anywhere.
+                Clearing the site data resets them; a private window may not keep them.
+            </p>
+            <h3 class="about__subtitle">Tips</h3>
+            <ul class="about__list">
+                <li class="about__item">Tuning by ear: turn on <span class="ui-name">Repeat</span>, tap a string and tune
+                    while it repeats.</li>
+                <li class="about__item">To see the whole key around a chord, choose both a key and a chord: key notes
+                    outside the chord get a gold ring.</li>
+                <li class="about__item">A chord chosen in Learn stays highlighted on the fretboards in Jam. Set the chord to
+                    <span class="ui-name">Off</span> before switching to see the whole key.</li>
+                <li class="about__item">In Jam, after you pick a key with the mouse the computer keyboard plays the pad right
+                    away. If the keys stop working, click the pad once.</li>
+            </ul>
+        </section>
+
+        <p class="about__end">
+            <a class="about__link" href="index.html">Back to app</a>
+            <span aria-hidden="true">·</span>
+            <a class="about__link" href="#top">Back to top</a>
+        </p>
+    </main>
+</body>
+
+</html>

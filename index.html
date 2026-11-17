@@ -33,10 +33,13 @@
                 <path d="M12 2C6.9 2 3.5 3.7 3.5 7.3c0 4.8 5.1 12 7.2 14.1a1.8 1.8 0 0 0 2.6 0c2.1-2.1 7.2-9.3 7.2-14.1C20.5 3.7 17.1 2 12 2z" fill="currentColor"/>
             </svg>
             <h1 class="header__title">My Guitar Tuning</h1>
-            <!-- Learn — всё приложение, Jam — пэд с нотами тональности (jam.js) -->
-            <div class="segmented segmented_small header__mode" role="group" aria-label="Mode">
-                <button class="segmented__btn" data-mode="learn" aria-pressed="true">Learn</button>
-                <button class="segmented__btn" data-mode="jam" aria-pressed="false">Jam</button>
+            <div class="header__actions">
+                <!-- Learn — всё приложение, Jam — пэд с нотами тональности (jam.js) -->
+                <div class="segmented segmented_small header__mode" role="group" aria-label="Mode">
+                    <button class="segmented__btn" data-mode="learn" aria-pressed="true">Learn</button>
+                    <button class="segmented__btn" data-mode="jam" aria-pressed="false">Jam</button>
+                </div>
+                <a class="header__link" href="about.html">About</a>
             </div>
         </div>
     </header>

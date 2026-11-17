@@ -113,9 +113,27 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* Learn | Jam — справа в шапке */
-.header__mode {
+/* справа в шапке: Learn | Jam и ссылка About (на странице About — Back to app); на узком экране
+   переносятся на свою строку вместе */
+.header__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-left: auto;
+}
+
+.header__link {
+  display: inline-flex;
+  align-items: center;
+  align-self: stretch; /* высотой с переключатель Learn | Jam */
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: background-color var(--ease), color var(--ease);
 }
 
 /* сетка карточек: на широком экране «Tuning» и «Key» рядом, гриф во всю ширину */
@@ -863,7 +881,8 @@ body {
 
 /* наведение — только там, где есть мышь */
 @media (hover: hover) {
-  .segmented__btn:hover:not([aria-pressed="true"]) {
+  .segmented__btn:hover:not([aria-pressed="true"]),
+  .header__link:hover {
     color: var(--text);
   }
 
@@ -872,6 +891,7 @@ body {
   }
 
   .control__btn:hover,
+  .header__link:hover,
   .app__notes-item:hover,
   .sound__btn:hover:not([aria-pressed="true"]):not(:disabled),
   .select:hover,
